@@ -1,64 +1,71 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Upload, Download, FileText, GraduationCap } from "lucide-react";
-import { CollegeResultsTable } from "@/components/CollegeResultsTable";
+import { ChevronRight, ChevronLeft, GraduationCap, MapPin, BookOpen, User, Percent, Users } from "lucide-react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { CollegeResultsTable } from "@/components/CollegeResultsTable";
+import { analyzeCollegeOptions, type CollegeMatch, type StudentProfile } from "@/services/deepseekService";
 
-interface StudentForm {
-  fullName: string;
-  aggregatePercentage: number;
-  category: string;
-  preferredBranch: string;
-  preferredCities: string[];
+interface City {
+  value: string;
+  label: string;
 }
 
-interface CollegeResult {
-  collegeName: string;
-  city: string;
-  branch: string;
-  category: string;
-  cutoffRound1: number;
-  cutoffRound2: number;
-  cutoffRound3: number;
+interface Category {
+  value: string;
+  label: string;
+}
+
+interface Branch {
+  value: string;
+  label: string;
 }
 
 const Index = () => {
-  const [formData, setFormData] = useState<StudentForm>({
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [results, setResults] = useState<CollegeMatch[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [formData, setFormData] = useState({
     fullName: '',
-    aggregatePercentage: 0,
+    aggregate: '',
     category: '',
     preferredBranch: '',
-    preferredCities: []
+    preferredCities: [] as string[]
   });
-  
-  const [results, setResults] = useState<CollegeResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showResults, setShowResults] = useState(false);
 
-  const categories = ['GOPEN', 'EWS', 'SC', 'ST', 'OBC', 'VJ', 'NT-A', 'NT-B', 'NT-C', 'NT-D', 'SBC'];
-  const branches = ['Computer Engineering', 'Mechanical Engineering', 'Electrical Engineering', 'Civil Engineering', 'Electronics & Telecommunication', 'Information Technology', 'Chemical Engineering', 'Automobile Engineering'];
-  const cities = ['Mumbai', 'Pune', 'Nashik', 'Nagpur', 'Aurangabad', 'Kolhapur', 'Solapur', 'Sangli', 'Satara', 'Ahmednagar'];
+  const categories: Category[] = [
+    { value: 'Open', label: 'Open' },
+    { value: 'OBC', label: 'OBC' },
+    { value: 'SC', label: 'SC' },
+    { value: 'ST', label: 'ST' },
+    { value: 'EWS', label: 'EWS' },
+  ];
 
-  const handleCityToggle = (city: string) => {
-    setFormData(prev => ({
-      ...prev,
-      preferredCities: prev.preferredCities.includes(city)
-        ? prev.preferredCities.filter(c => c !== city)
-        : [...prev.preferredCities, city]
-    }));
-  };
+  const branches: Branch[] = [
+    { value: 'Computer Engineering', label: 'Computer Engineering' },
+    { value: 'Information Technology', label: 'Information Technology' },
+    { value: 'Electronics and Telecommunication', label: 'Electronics and Telecommunication' },
+    { value: 'Mechanical Engineering', label: 'Mechanical Engineering' },
+    { value: 'Civil Engineering', label: 'Civil Engineering' },
+    { value: 'Electrical Engineering', label: 'Electrical Engineering' },
+    { value: 'AI and DS', label: 'AI and DS' },
+  ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.fullName || !formData.aggregatePercentage || !formData.category || !formData.preferredBranch) {
+  const cities: City[] = [
+    { value: 'Mumbai', label: 'Mumbai' },
+    { value: 'Pune', label: 'Pune' },
+    { value: 'Nagpur', label: 'Nagpur' },
+    { value: 'Nashik', label: 'Nashik' },
+    { value: 'Aurangabad', label: 'Aurangabad' },
+  ];
+
+  const handleSubmit = async () => {
+    if (!formData.fullName || !formData.aggregate || !formData.category || !formData.preferredBranch) {
       toast({
         title: "Incomplete Form",
         description: "Please fill in all required fields.",
@@ -67,77 +74,80 @@ const Index = () => {
       return;
     }
 
-    setIsLoading(true);
+    const aggregate = parseFloat(formData.aggregate);
+    if (isNaN(aggregate) || aggregate < 0 || aggregate > 100) {
+      toast({
+        title: "Invalid Percentage",
+        description: "Please enter a valid percentage between 0 and 100.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsAnalyzing(true);
     
     try {
-      // Mock API call to DeepSeek R1 (would be replaced with actual API)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const studentProfile: StudentProfile = {
+        fullName: formData.fullName,
+        aggregate: aggregate,
+        category: formData.category,
+        preferredBranch: formData.preferredBranch,
+        preferredCities: formData.preferredCities
+      };
+
+      console.log('Analyzing college options for:', studentProfile);
       
-      // Mock results for demonstration
-      const mockResults: CollegeResult[] = [
-        {
-          collegeName: "Government College of Engineering, Pune",
-          city: "Pune",
-          branch: formData.preferredBranch,
-          category: formData.category,
-          cutoffRound1: 85.5,
-          cutoffRound2: 83.2,
-          cutoffRound3: 81.0
-        },
-        {
-          collegeName: "Walchand College of Engineering, Sangli",
-          city: "Sangli",
-          branch: formData.preferredBranch,
-          category: formData.category,
-          cutoffRound1: 82.3,
-          cutoffRound2: 80.1,
-          cutoffRound3: 78.5
-        }
-      ];
+      const collegeMatches = await analyzeCollegeOptions(studentProfile);
       
-      setResults(mockResults);
+      console.log('AI Analysis Results:', collegeMatches);
+      
+      setResults(collegeMatches);
       setShowResults(true);
       
       toast({
         title: "Analysis Complete!",
-        description: `Found ${mockResults.length} matching colleges for your profile.`
+        description: `Found ${collegeMatches.length} matching colleges for ${formData.fullName}.`
       });
       
     } catch (error) {
+      console.error('Analysis error:', error);
       toast({
-        title: "Error",
-        description: "Failed to analyze your profile. Please try again.",
+        title: "Analysis Failed",
+        description: "Unable to analyze college options. Please try again.",
         variant: "destructive"
       });
     } finally {
-      setIsLoading(false);
+      setIsAnalyzing(false);
     }
   };
 
-  const handleRefillForm = () => {
-    setFormData({
-      fullName: '',
-      aggregatePercentage: 0,
-      category: '',
-      preferredBranch: '',
-      preferredCities: []
+  const handleNext = () => {
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handlePrev = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  const toggleCity = (city: string) => {
+    setFormData(prev => {
+      if (prev.preferredCities.includes(city)) {
+        return {
+          ...prev,
+          preferredCities: prev.preferredCities.filter(c => c !== city)
+        };
+      } else {
+        return {
+          ...prev,
+          preferredCities: [...prev.preferredCities, city]
+        };
+      }
     });
+  };
+
+  const refillForm = () => {
     setShowResults(false);
-    setResults([]);
-  };
-
-  const exportToPDF = () => {
-    toast({
-      title: "Export Feature",
-      description: "PDF export functionality will be implemented."
-    });
-  };
-
-  const exportToCSV = () => {
-    toast({
-      title: "Export Feature", 
-      description: "CSV export functionality will be implemented."
-    });
+    setCurrentStep(1);
   };
 
   if (showResults) {
@@ -146,38 +156,17 @@ const Index = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
-              <GraduationCap className="h-8 w-8 text-blue-600" />
+              <GraduationCap className="h-10 w-10 text-blue-600" />
               MyDSE Options
             </h1>
-            <p className="text-lg text-gray-600">Your Personalized College Recommendations</p>
+            <p className="text-gray-600">Personalized college recommendations for {formData.fullName}</p>
           </div>
 
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Results for {formData.fullName}</span>
-                <div className="flex gap-2">
-                  <Button onClick={exportToPDF} variant="outline" size="sm">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Export PDF
-                  </Button>
-                  <Button onClick={exportToCSV} variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export CSV
-                  </Button>
-                  <Button onClick={handleRefillForm} variant="default" size="sm">
-                    Refill Form
-                  </Button>
-                </div>
-              </CardTitle>
-              <CardDescription>
-                Category: {formData.category} | Branch: {formData.preferredBranch} | Aggregate: {formData.aggregatePercentage}%
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CollegeResultsTable results={results} />
-            </CardContent>
-          </Card>
+          <CollegeResultsTable 
+            results={results} 
+            studentName={formData.fullName}
+            onRefillForm={refillForm}
+          />
         </div>
       </div>
     );
@@ -185,108 +174,139 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
-            <GraduationCap className="h-8 w-8 text-blue-600" />
+            <GraduationCap className="h-10 w-10 text-blue-600" />
             MyDSE Options
           </h1>
-          <p className="text-lg text-gray-600">Find Your Perfect DSE College Match in Maharashtra</p>
+          <p className="text-gray-600">Find the best DSE college options based on your profile</p>
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Student Information Form</CardTitle>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl">
+              {currentStep === 1 && "Personal Information"}
+              {currentStep === 2 && "Academic Details"}
+              {currentStep === 3 && "Preferences"}
+            </CardTitle>
             <CardDescription>
-              Fill in your details to get personalized college recommendations for Direct Second Year Engineering admission
+              {currentStep === 1 && "Tell us a bit about yourself to personalize your college options."}
+              {currentStep === 2 && "Enter your academic scores to match with college cutoffs."}
+              {currentStep === 3 && "Let us know your preferences for branch and location."}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <CardContent className="space-y-4">
+            {currentStep === 1 && (
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name *</Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData(prev => ({...prev, fullName: e.target.value}))}
-                  placeholder="Enter your full name"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="percentage">Final Year Diploma Aggregate Percentage *</Label>
-                <Input
-                  id="percentage"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={formData.aggregatePercentage || ''}
-                  onChange={(e) => setFormData(prev => ({...prev, aggregatePercentage: parseFloat(e.target.value) || 0}))}
-                  placeholder="Enter your aggregate percentage"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Category *</Label>
-                <Select value={formData.category} onValueChange={(value) => setFormData(prev => ({...prev, category: value}))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category}>{category}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Preferred Engineering Branch *</Label>
-                <Select value={formData.preferredBranch} onValueChange={(value) => setFormData(prev => ({...prev, preferredBranch: value}))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your preferred branch" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {branches.map(branch => (
-                      <SelectItem key={branch} value={branch}>{branch}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-4">
-                <Label>Preferred Cities (optional - leave empty for all cities)</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {cities.map(city => (
-                    <div key={city} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={city}
-                        checked={formData.preferredCities.includes(city)}
-                        onCheckedChange={() => handleCityToggle(city)}
-                      />
-                      <Label htmlFor={city} className="text-sm font-normal">{city}</Label>
-                    </div>
-                  ))}
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="Enter your full name"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  />
                 </div>
               </div>
+            )}
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <LoadingSpinner />
-                    Analyzing Your Profile...
-                  </>
-                ) : (
-                  'Find My College Options'
-                )}
-              </Button>
-            </form>
+            {currentStep === 2 && (
+              <div className="space-y-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="aggregate">Aggregate Percentage</Label>
+                  <Input
+                    id="aggregate"
+                    type="number"
+                    placeholder="Enter your aggregate percentage"
+                    value={formData.aggregate}
+                    onChange={(e) => setFormData({ ...formData, aggregate: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="category">Category</Label>
+                  <select
+                    id="category"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  >
+                    <option value="" disabled>Select your category</option>
+                    {categories.map((category) => (
+                      <option key={category.value} value={category.value}>{category.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 3 && (
+              <div className="space-y-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="preferredBranch">Preferred Branch</Label>
+                  <select
+                    id="preferredBranch"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={formData.preferredBranch}
+                    onChange={(e) => setFormData({ ...formData, preferredBranch: e.target.value })}
+                  >
+                    <option value="" disabled>Select your preferred branch</option>
+                    {branches.map((branch) => (
+                      <option key={branch.value} value={branch.value}>{branch.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Preferred Cities</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {cities.map((city) => (
+                      <Badge
+                        key={city.value}
+                        variant={formData.preferredCities.includes(city.value) ? "default" : "outline"}
+                        onClick={() => toggleCity(city.value)}
+                        className="cursor-pointer"
+                      >
+                        {city.label}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        <div className="flex justify-between mt-4">
+          {currentStep > 1 ? (
+            <Button variant="secondary" onClick={handlePrev}>
+              <ChevronLeft className="w-4 h-4 mr-2" />
+              Previous
+            </Button>
+          ) : (
+            <div></div>
+          )}
+
+          {currentStep < 3 ? (
+            <Button onClick={handleNext}>
+              Next
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
+          ) : (
+            <Button onClick={handleSubmit} disabled={isAnalyzing}>
+              {isAnalyzing ? (
+                <>
+                  Analyzing...
+                  <LoadingSpinner />
+                </>
+              ) : (
+                <>
+                  Analyze Options
+                  <GraduationCap className="w-4 h-4 ml-2" />
+                </>
+              )}
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
