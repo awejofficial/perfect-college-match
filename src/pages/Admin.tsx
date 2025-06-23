@@ -5,14 +5,40 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Upload, FileText, Calendar, Shield } from "lucide-react";
+import { Upload, FileText, Calendar, Shield, Clock, CheckCircle, XCircle } from "lucide-react";
+
+interface UploadedFile {
+  id: string;
+  name: string;
+  round: number;
+  uploadDate: string;
+  status: 'uploaded' | 'processing' | 'ready';
+}
+
+interface RecentActivity {
+  id: string;
+  action: string;
+  fileName: string;
+  round: number;
+  timestamp: string;
+  status: 'success' | 'error';
+}
 
 const Admin = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [credentials, setCredentials] = useState({ username: '', password: '' });
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [lastUploadDate, setLastUploadDate] = useState<string>('');
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<{[key: number]: File | null}>({
+    1: null,
+    2: null,
+    3: null
+  });
+  const [uploadingRounds, setUploadingRounds] = useState<{[key: number]: boolean}>({
+    1: false,
+    2: false,
+    3: false
+  });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,13 +58,13 @@ const Admin = () => {
     }
   };
 
-  const handleFileUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleFileUpload = async (round: number) => {
+    const file = selectedFiles[round];
     
-    if (!uploadedFile) {
+    if (!file) {
       toast({
         title: "No File Selected",
-        description: "Please select a file to upload.",
+        description: `Please select a file for Round ${round} cutoff.`,
         variant: "destructive"
       });
       return;
@@ -51,7 +77,7 @@ const Admin = () => {
       'application/pdf'
     ];
 
-    if (!allowedTypes.includes(uploadedFile.type)) {
+    if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Invalid File Type",
         description: "Please upload an Excel, CSV, or PDF file.",
@@ -60,30 +86,67 @@ const Admin = () => {
       return;
     }
 
-    setIsUploading(true);
+    setUploadingRounds(prev => ({ ...prev, [round]: true }));
     
     try {
       // Simulate file upload process
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       const currentDate = new Date().toLocaleString();
-      setLastUploadDate(currentDate);
+      const fileId = `${round}-${Date.now()}`;
+      
+      // Update uploaded files
+      const newFile: UploadedFile = {
+        id: fileId,
+        name: file.name,
+        round: round,
+        uploadDate: currentDate,
+        status: 'ready'
+      };
+      
+      setUploadedFiles(prev => {
+        const filtered = prev.filter(f => f.round !== round);
+        return [...filtered, newFile];
+      });
+      
+      // Add to recent activities
+      const newActivity: RecentActivity = {
+        id: `activity-${Date.now()}`,
+        action: 'File Uploaded',
+        fileName: file.name,
+        round: round,
+        timestamp: currentDate,
+        status: 'success'
+      };
+      
+      setRecentActivities(prev => [newActivity, ...prev.slice(0, 9)]);
       
       toast({
         title: "File Uploaded Successfully",
-        description: `Cutoff data updated on ${currentDate}. This file will now be used for all student queries.`
+        description: `Round ${round} cutoff data updated on ${currentDate}.`
       });
       
-      setUploadedFile(null);
+      setSelectedFiles(prev => ({ ...prev, [round]: null }));
       
     } catch (error) {
+      const newActivity: RecentActivity = {
+        id: `activity-${Date.now()}`,
+        action: 'Upload Failed',
+        fileName: file.name,
+        round: round,
+        timestamp: new Date().toLocaleString(),
+        status: 'error'
+      };
+      
+      setRecentActivities(prev => [newActivity, ...prev.slice(0, 9)]);
+      
       toast({
         title: "Upload Failed",
-        description: "Failed to upload the cutoff file. Please try again.",
+        description: `Failed to upload Round ${round} cutoff file. Please try again.`,
         variant: "destructive"
       });
     } finally {
-      setIsUploading(false);
+      setUploadingRounds(prev => ({ ...prev, [round]: false }));
     }
   };
 
@@ -145,7 +208,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 p-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
@@ -159,41 +222,69 @@ const Admin = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Upload className="h-5 w-5" />
-                Upload Cutoff Data
-              </CardTitle>
-              <CardDescription>
-                Upload the latest CAP cutoff list to update the system database
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleFileUpload} className="space-y-4">
+        {/* Upload Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {[1, 2, 3].map((round) => (
+            <Card key={round} className="relative">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Upload className="h-5 w-5" />
+                  Round {round} Cutoff
+                </CardTitle>
+                <CardDescription>
+                  Upload CAP Round {round} cutoff list
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="cutoffFile">Cutoff File (Excel, CSV, or PDF)</Label>
+                  <Label htmlFor={`cutoffFile${round}`}>Cutoff File (Excel, CSV, or PDF)</Label>
                   <Input
-                    id="cutoffFile"
+                    id={`cutoffFile${round}`}
                     type="file"
                     accept=".xlsx,.xls,.csv,.pdf"
-                    onChange={(e) => setUploadedFile(e.target.files?.[0] || null)}
-                    required
+                    onChange={(e) => setSelectedFiles(prev => ({ 
+                      ...prev, 
+                      [round]: e.target.files?.[0] || null 
+                    }))}
                   />
-                  {uploadedFile && (
+                  {selectedFiles[round] && (
                     <p className="text-sm text-gray-600">
-                      Selected: {uploadedFile.name}
+                      Selected: {selectedFiles[round]?.name}
                     </p>
                   )}
                 </div>
-                <Button type="submit" disabled={isUploading} className="w-full">
-                  {isUploading ? 'Uploading...' : 'Upload Cutoff Data'}
+                
+                {/* Current File Status */}
+                {uploadedFiles.find(f => f.round === round) && (
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <p className="text-sm font-medium text-green-800">Current File</p>
+                    </div>
+                    <p className="text-sm text-green-600 mt-1">
+                      {uploadedFiles.find(f => f.round === round)?.name}
+                    </p>
+                    <p className="text-xs text-green-500">
+                      Uploaded: {uploadedFiles.find(f => f.round === round)?.uploadDate}
+                    </p>
+                  </div>
+                )}
+                
+                <Button 
+                  onClick={() => handleFileUpload(round)}
+                  disabled={uploadingRounds[round]} 
+                  className="w-full"
+                  size="sm"
+                >
+                  {uploadingRounds[round] ? 'Uploading...' : `Upload Round ${round}`}
                 </Button>
-              </form>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
+        {/* Status and Activities Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -213,16 +304,73 @@ const Admin = () => {
                 <div className="h-3 w-3 bg-green-500 rounded-full"></div>
               </div>
               
-              {lastUploadDate && (
-                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="font-medium text-blue-800">Last Upload</p>
-                  <p className="text-sm text-blue-600">{lastUploadDate}</p>
-                </div>
-              )}
-              
-              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="font-medium text-gray-800">Supported Formats</p>
-                <p className="text-sm text-gray-600">Excel (.xlsx, .xls), CSV (.csv), PDF (.pdf)</p>
+              <div className="space-y-2">
+                <p className="font-medium text-gray-800">Uploaded Files Status</p>
+                {[1, 2, 3].map(round => {
+                  const file = uploadedFiles.find(f => f.round === round);
+                  return (
+                    <div key={round} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <span className="text-sm">Round {round}</span>
+                      <div className="flex items-center gap-2">
+                        {file ? (
+                          <>
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <span className="text-xs text-green-600">Ready</span>
+                          </>
+                        ) : (
+                          <>
+                            <XCircle className="h-4 w-4 text-gray-400" />
+                            <span className="text-xs text-gray-500">Not uploaded</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Recent Activities
+              </CardTitle>
+              <CardDescription>
+                Latest upload activities and system events
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {recentActivities.length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No recent activities
+                  </p>
+                ) : (
+                  recentActivities.map((activity) => (
+                    <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex-shrink-0 mt-0.5">
+                        {activity.status === 'success' ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-red-500" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">
+                          {activity.action} - Round {activity.round}
+                        </p>
+                        <p className="text-xs text-gray-600 truncate">
+                          {activity.fileName}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {activity.timestamp}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -237,11 +385,12 @@ const Admin = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3 text-sm text-gray-600">
-              <p>• Upload the latest CAP cutoff list containing college-wise cutoffs for all rounds</p>
+              <p>• Upload cutoff files for all three CAP rounds separately</p>
               <p>• Supported file formats: Excel (.xlsx, .xls), CSV (.csv), or PDF (.pdf)</p>
-              <p>• The uploaded file will replace the existing cutoff data</p>
-              <p>• All student queries will use the newly uploaded data immediately</p>
-              <p>• Ensure the file contains complete information for accurate AI analysis</p>
+              <p>• Each round file will be used independently for student queries</p>
+              <p>• Students with aggregate ≥ cutoff for their category will see matching colleges</p>
+              <p>• All cities and colleges will be considered if no specific city preference is selected</p>
+              <p>• The system works fine even if only 2 rounds are uploaded</p>
             </div>
           </CardContent>
         </Card>

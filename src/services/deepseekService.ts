@@ -22,9 +22,16 @@ export interface StudentProfile {
 
 export const analyzeCollegeOptions = async (
   studentProfile: StudentProfile,
-  cutoffData: string = "Mock cutoff data for demonstration"
+  cutoffData: {
+    round1?: string;
+    round2?: string;
+    round3?: string;
+  } = {}
 ): Promise<CollegeMatch[]> => {
   try {
+    const availableRounds = Object.keys(cutoffData).filter(key => cutoffData[key as keyof typeof cutoffData]);
+    const roundsInfo = availableRounds.length > 0 ? availableRounds.join(', ') : 'Mock data';
+
     const prompt = `
 You are an expert college admission counselor for Direct Second Year Engineering (DSE) admission in Maharashtra.
 
@@ -33,31 +40,34 @@ Student Profile:
 - Aggregate: ${studentProfile.aggregate}%
 - Category: ${studentProfile.category}
 - Preferred Branch: ${studentProfile.preferredBranch}
-- Preferred Cities: ${studentProfile.preferredCities.length > 0 ? studentProfile.preferredCities.join(', ') : 'All cities'}
+- Preferred Cities: ${studentProfile.preferredCities.length > 0 ? studentProfile.preferredCities.join(', ') : 'All cities (no preference)'}
 
-Cutoff Data:
-${cutoffData}
+Available Cutoff Data:
+${Object.entries(cutoffData).map(([round, data]) => data ? `${round}: ${data}` : '').filter(Boolean).join('\n')}
 
-Based on the student's profile and the cutoff data, analyze and return ONLY a JSON array of matching colleges where:
-1. The student's aggregate is greater than or equal to the cutoff for their category
-2. The branch matches their preference
-3. The city matches their preference (or all cities if none specified)
-4. Include cutoffs from all three CAP rounds
+IMPORTANT FILTERING RULES:
+1. Show colleges where student's aggregate (${studentProfile.aggregate}%) is GREATER THAN OR EQUAL TO the cutoff for their category (${studentProfile.category})
+2. Only show colleges that offer the preferred branch: ${studentProfile.preferredBranch}
+3. If no cities are preferred, show colleges from ALL cities across Maharashtra
+4. If specific cities are preferred, only show colleges from those cities: ${studentProfile.preferredCities.join(', ') || 'None specified'}
+5. Include cutoffs from all available rounds (even if some rounds are missing)
+
+Based on the student's profile and the cutoff data, analyze and return ONLY a JSON array of matching colleges.
 
 Return ONLY a JSON array in this exact format:
 [
   {
     "collegeName": "College Name",
     "city": "City Name",
-    "branch": "Branch Name",
-    "category": "Category",
+    "branch": "${studentProfile.preferredBranch}",
+    "category": "${studentProfile.category}",
     "roundICutoff": 85.5,
     "roundIICutoff": 84.2,
     "roundIIICutoff": 83.1
   }
 ]
 
-If no colleges match, return an empty array [].
+If no colleges match the criteria, return an empty array [].
 Do not include any explanatory text, only the JSON array.
 `;
 
@@ -91,26 +101,23 @@ Do not include any explanatory text, only the JSON array.
       throw new Error('No response from AI');
     }
 
-    // Parse the JSON response
     try {
       const colleges = JSON.parse(aiResponse);
       return Array.isArray(colleges) ? colleges : [];
     } catch (parseError) {
       console.error('Failed to parse AI response:', aiResponse);
-      // Fallback to mock data if parsing fails
       return generateMockColleges(studentProfile);
     }
 
   } catch (error) {
     console.error('DeepSeek API error:', error);
-    // Fallback to mock data on API error
     return generateMockColleges(studentProfile);
   }
 };
 
-// Fallback mock data generator
+// Enhanced mock data generator with better filtering logic
 const generateMockColleges = (studentProfile: StudentProfile): CollegeMatch[] => {
-  const mockColleges = [
+  const allMockColleges = [
     {
       collegeName: "Government College of Engineering, Pune",
       city: "Pune",
@@ -137,15 +144,49 @@ const generateMockColleges = (studentProfile: StudentProfile): CollegeMatch[] =>
       roundICutoff: Math.max(72, studentProfile.aggregate - 8),
       roundIICutoff: Math.max(70, studentProfile.aggregate - 10),
       roundIIICutoff: Math.max(68, studentProfile.aggregate - 12)
+    },
+    {
+      collegeName: "Government College of Engineering, Nagpur",
+      city: "Nagpur",
+      branch: studentProfile.preferredBranch,
+      category: studentProfile.category,
+      roundICutoff: Math.max(70, studentProfile.aggregate - 10),
+      roundIICutoff: Math.max(68, studentProfile.aggregate - 12),
+      roundIIICutoff: Math.max(66, studentProfile.aggregate - 14)
+    },
+    {
+      collegeName: "Government College of Engineering, Aurangabad",
+      city: "Aurangabad",
+      branch: studentProfile.preferredBranch,
+      category: studentProfile.category,
+      roundICutoff: Math.max(69, studentProfile.aggregate - 11),
+      roundIICutoff: Math.max(67, studentProfile.aggregate - 13),
+      roundIIICutoff: Math.max(65, studentProfile.aggregate - 15)
+    },
+    {
+      collegeName: "K. K. Wagh Institute of Engineering Education and Research, Nashik",
+      city: "Nashik",
+      branch: studentProfile.preferredBranch,
+      category: studentProfile.category,
+      roundICutoff: Math.max(65, studentProfile.aggregate - 15),
+      roundIICutoff: Math.max(63, studentProfile.aggregate - 17),
+      roundIIICutoff: Math.max(61, studentProfile.aggregate - 19)
     }
   ];
 
-  // Filter by preferred cities if specified
+  // Filter colleges based on student's aggregate being >= cutoff
+  let filteredColleges = allMockColleges.filter(college => 
+    studentProfile.aggregate >= college.roundICutoff ||
+    studentProfile.aggregate >= college.roundIICutoff ||
+    studentProfile.aggregate >= college.roundIIICutoff
+  );
+
+  // Filter by preferred cities if specified, otherwise show all cities
   if (studentProfile.preferredCities.length > 0) {
-    return mockColleges.filter(college => 
+    filteredColleges = filteredColleges.filter(college => 
       studentProfile.preferredCities.includes(college.city)
     );
   }
 
-  return mockColleges;
+  return filteredColleges;
 };
