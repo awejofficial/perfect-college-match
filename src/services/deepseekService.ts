@@ -7,9 +7,9 @@ export interface CollegeMatch {
   city: string;
   branch: string;
   category: string;
-  roundICutoff: number;
-  roundIICutoff: number;
-  roundIIICutoff: number;
+  round: string;
+  cutoff: number;
+  eligible: boolean;
 }
 
 export interface StudentProfile {
@@ -20,6 +20,19 @@ export interface StudentProfile {
   preferredCities: string[];
 }
 
+// Valid branches for CS/IT/AI focus
+const VALID_BRANCHES = [
+  'Computer Engineering',
+  'Computer Science and Engineering',
+  'Computer Science and Engineering (Data Science)',
+  'Information Technology',
+  'Artificial Intelligence and Data Science',
+  'Artificial Intelligence (AI) and Data Science'
+];
+
+// Valid categories
+const VALID_CATEGORIES = ['EWS', 'GOPEN'];
+
 export const analyzeCollegeOptions = async (
   studentProfile: StudentProfile,
   cutoffData: {
@@ -29,46 +42,56 @@ export const analyzeCollegeOptions = async (
   } = {}
 ): Promise<CollegeMatch[]> => {
   try {
-    const availableRounds = Object.keys(cutoffData).filter(key => cutoffData[key as keyof typeof cutoffData]);
-    const roundsInfo = availableRounds.length > 0 ? availableRounds.join(', ') : 'Mock data';
+    // Validate category
+    if (!VALID_CATEGORIES.includes(studentProfile.category)) {
+      console.log('Invalid category. Only EWS and GOPEN are supported.');
+      return [];
+    }
 
+    // Validate branch
+    if (!VALID_BRANCHES.includes(studentProfile.preferredBranch)) {
+      console.log('Invalid branch. Only CS/IT/AI branches are supported.');
+      return [];
+    }
+
+    const availableRounds = Object.keys(cutoffData).filter(key => cutoffData[key as keyof typeof cutoffData]);
+    
     const prompt = `
-You are an expert college admission counselor for Direct Second Year Engineering (DSE) admission in Maharashtra.
+You are an expert DSE admission counselor for Maharashtra. Analyze 2024 CAP Round cutoffs.
 
 Student Profile:
 - Name: ${studentProfile.fullName}
-- Aggregate: ${studentProfile.aggregate}%
-- Category: ${studentProfile.category}
+- Percentage: ${studentProfile.aggregate}%
+- Category: ${studentProfile.category} (Only EWS/GOPEN allowed)
 - Preferred Branch: ${studentProfile.preferredBranch}
-- Preferred Cities: ${studentProfile.preferredCities.length > 0 ? studentProfile.preferredCities.join(', ') : 'All cities (no preference)'}
+
+STRICT FILTERING RULES:
+1. Show ONLY EWS and GOPEN category cutoffs
+2. Show ONLY these branches: Computer Engineering, Computer Science and Engineering, Computer Science and Engineering (Data Science), Information Technology, Artificial Intelligence and Data Science, Artificial Intelligence (AI) and Data Science
+3. Compare student percentage (${studentProfile.aggregate}%) with cutoff
+4. Mark eligible: true if student percentage >= cutoff, false otherwise
+5. Include colleges from ALL cities in Maharashtra
+6. Show results for available rounds only: ${availableRounds.join(', ')}
 
 Available Cutoff Data:
-${Object.entries(cutoffData).map(([round, data]) => data ? `${round}: ${data}` : '').filter(Boolean).join('\n')}
-
-IMPORTANT FILTERING RULES:
-1. Show colleges where student's aggregate (${studentProfile.aggregate}%) is GREATER THAN OR EQUAL TO the cutoff for their category (${studentProfile.category})
-2. Only show colleges that offer the preferred branch: ${studentProfile.preferredBranch}
-3. If no cities are preferred, show colleges from ALL cities across Maharashtra
-4. If specific cities are preferred, only show colleges from those cities: ${studentProfile.preferredCities.join(', ') || 'None specified'}
-5. Include cutoffs from all available rounds (even if some rounds are missing)
-
-Based on the student's profile and the cutoff data, analyze and return ONLY a JSON array of matching colleges.
+${Object.entries(cutoffData).map(([round, data]) => data ? `${round}: Available` : '').filter(Boolean).join('\n')}
 
 Return ONLY a JSON array in this exact format:
 [
   {
     "collegeName": "College Name",
-    "city": "City Name",
+    "city": "City Name", 
     "branch": "${studentProfile.preferredBranch}",
     "category": "${studentProfile.category}",
-    "roundICutoff": 85.5,
-    "roundIICutoff": 84.2,
-    "roundIIICutoff": 83.1
+    "round": "I",
+    "cutoff": 85.5,
+    "eligible": true
   }
 ]
 
-If no colleges match the criteria, return an empty array [].
-Do not include any explanatory text, only the JSON array.
+Sort by: Government colleges first, then by eligibility (eligible first), then by cutoff (lower first).
+If no colleges match, return empty array [].
+Return ONLY JSON, no explanatory text.
 `;
 
     const response = await fetch(DEEPSEEK_API_URL, {
@@ -85,7 +108,7 @@ Do not include any explanatory text, only the JSON array.
             content: prompt
           }
         ],
-        max_tokens: 2000,
+        max_tokens: 3000,
         temperature: 0.1
       })
     });
@@ -115,78 +138,102 @@ Do not include any explanatory text, only the JSON array.
   }
 };
 
-// Enhanced mock data generator with better filtering logic
+// Enhanced mock data for CS/IT/AI branches with eligibility
 const generateMockColleges = (studentProfile: StudentProfile): CollegeMatch[] => {
-  const allMockColleges = [
+  // Validate inputs for mock data
+  if (!VALID_CATEGORIES.includes(studentProfile.category) || 
+      !VALID_BRANCHES.includes(studentProfile.preferredBranch)) {
+    return [];
+  }
+
+  const mockColleges = [
     {
       collegeName: "Government College of Engineering, Pune",
       city: "Pune",
       branch: studentProfile.preferredBranch,
       category: studentProfile.category,
-      roundICutoff: Math.max(75, studentProfile.aggregate - 5),
-      roundIICutoff: Math.max(73, studentProfile.aggregate - 7),
-      roundIIICutoff: Math.max(71, studentProfile.aggregate - 9)
+      round: "I",
+      cutoff: 85.5,
+      eligible: studentProfile.aggregate >= 85.5
+    },
+    {
+      collegeName: "Government College of Engineering, Pune", 
+      city: "Pune",
+      branch: studentProfile.preferredBranch,
+      category: studentProfile.category,
+      round: "II",
+      cutoff: 83.2,
+      eligible: studentProfile.aggregate >= 83.2
+    },
+    {
+      collegeName: "Veermata Jijabai Technological Institute, Mumbai",
+      city: "Mumbai", 
+      branch: studentProfile.preferredBranch,
+      category: studentProfile.category,
+      round: "I",
+      cutoff: 88.5,
+      eligible: studentProfile.aggregate >= 88.5
     },
     {
       collegeName: "Veermata Jijabai Technological Institute, Mumbai",
       city: "Mumbai",
-      branch: studentProfile.preferredBranch,
+      branch: studentProfile.preferredBranch, 
       category: studentProfile.category,
-      roundICutoff: Math.max(78, studentProfile.aggregate - 3),
-      roundIICutoff: Math.max(76, studentProfile.aggregate - 5),
-      roundIIICutoff: Math.max(74, studentProfile.aggregate - 7)
+      round: "II",
+      cutoff: 86.3,
+      eligible: studentProfile.aggregate >= 86.3
     },
     {
-      collegeName: "College of Engineering, Pune",
+      collegeName: "Pune Institute of Computer Technology (PICT)",
       city: "Pune",
       branch: studentProfile.preferredBranch,
       category: studentProfile.category,
-      roundICutoff: Math.max(72, studentProfile.aggregate - 8),
-      roundIICutoff: Math.max(70, studentProfile.aggregate - 10),
-      roundIIICutoff: Math.max(68, studentProfile.aggregate - 12)
+      round: "I", 
+      cutoff: 84.7,
+      eligible: studentProfile.aggregate >= 84.7
+    },
+    {
+      collegeName: "Pune Institute of Computer Technology (PICT)",
+      city: "Pune",
+      branch: studentProfile.preferredBranch,
+      category: studentProfile.category,
+      round: "II",
+      cutoff: 82.5,
+      eligible: studentProfile.aggregate >= 82.5
     },
     {
       collegeName: "Government College of Engineering, Nagpur",
       city: "Nagpur",
       branch: studentProfile.preferredBranch,
       category: studentProfile.category,
-      roundICutoff: Math.max(70, studentProfile.aggregate - 10),
-      roundIICutoff: Math.max(68, studentProfile.aggregate - 12),
-      roundIIICutoff: Math.max(66, studentProfile.aggregate - 14)
+      round: "I",
+      cutoff: 82.0,
+      eligible: studentProfile.aggregate >= 82.0
     },
     {
-      collegeName: "Government College of Engineering, Aurangabad",
-      city: "Aurangabad",
+      collegeName: "Government College of Engineering, Nagpur",
+      city: "Nagpur", 
       branch: studentProfile.preferredBranch,
       category: studentProfile.category,
-      roundICutoff: Math.max(69, studentProfile.aggregate - 11),
-      roundIICutoff: Math.max(67, studentProfile.aggregate - 13),
-      roundIIICutoff: Math.max(65, studentProfile.aggregate - 15)
-    },
-    {
-      collegeName: "K. K. Wagh Institute of Engineering Education and Research, Nashik",
-      city: "Nashik",
-      branch: studentProfile.preferredBranch,
-      category: studentProfile.category,
-      roundICutoff: Math.max(65, studentProfile.aggregate - 15),
-      roundIICutoff: Math.max(63, studentProfile.aggregate - 17),
-      roundIIICutoff: Math.max(61, studentProfile.aggregate - 19)
+      round: "II",
+      cutoff: 80.5,
+      eligible: studentProfile.aggregate >= 80.5
     }
   ];
 
-  // Filter colleges based on student's aggregate being >= cutoff
-  let filteredColleges = allMockColleges.filter(college => 
-    studentProfile.aggregate >= college.roundICutoff ||
-    studentProfile.aggregate >= college.roundIICutoff ||
-    studentProfile.aggregate >= college.roundIIICutoff
-  );
-
-  // Filter by preferred cities if specified, otherwise show all cities
-  if (studentProfile.preferredCities.length > 0) {
-    filteredColleges = filteredColleges.filter(college => 
-      studentProfile.preferredCities.includes(college.city)
-    );
-  }
-
-  return filteredColleges;
+  // Sort by government colleges first, then eligible first, then by cutoff
+  return mockColleges.sort((a, b) => {
+    // Government colleges first
+    const aIsGovt = a.collegeName.toLowerCase().includes('government');
+    const bIsGovt = b.collegeName.toLowerCase().includes('government');
+    if (aIsGovt && !bIsGovt) return -1;
+    if (!aIsGovt && bIsGovt) return 1;
+    
+    // Eligible first
+    if (a.eligible && !b.eligible) return -1;
+    if (!a.eligible && b.eligible) return 1;
+    
+    // Lower cutoff first (easier to get into)
+    return a.cutoff - b.cutoff;
+  });
 };

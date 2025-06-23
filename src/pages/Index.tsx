@@ -39,29 +39,17 @@ const Index = () => {
   });
 
   const categories: Category[] = [
-    { value: 'Open', label: 'Open' },
-    { value: 'OBC', label: 'OBC' },
-    { value: 'SC', label: 'SC' },
-    { value: 'ST', label: 'ST' },
-    { value: 'EWS', label: 'EWS' },
+    { value: 'EWS', label: 'EWS (Economically Weaker Section)' },
+    { value: 'GOPEN', label: 'GOPEN (General Open)' },
   ];
 
   const branches: Branch[] = [
     { value: 'Computer Engineering', label: 'Computer Engineering' },
+    { value: 'Computer Science and Engineering', label: 'Computer Science and Engineering' },
+    { value: 'Computer Science and Engineering (Data Science)', label: 'Computer Science and Engineering (Data Science)' },
     { value: 'Information Technology', label: 'Information Technology' },
-    { value: 'Electronics and Telecommunication', label: 'Electronics and Telecommunication' },
-    { value: 'Mechanical Engineering', label: 'Mechanical Engineering' },
-    { value: 'Civil Engineering', label: 'Civil Engineering' },
-    { value: 'Electrical Engineering', label: 'Electrical Engineering' },
-    { value: 'AI and DS', label: 'AI and DS' },
-  ];
-
-  const cities: City[] = [
-    { value: 'Mumbai', label: 'Mumbai' },
-    { value: 'Pune', label: 'Pune' },
-    { value: 'Nagpur', label: 'Nagpur' },
-    { value: 'Nashik', label: 'Nashik' },
-    { value: 'Aurangabad', label: 'Aurangabad' },
+    { value: 'Artificial Intelligence and Data Science', label: 'Artificial Intelligence and Data Science' },
+    { value: 'Artificial Intelligence (AI) and Data Science', label: 'Artificial Intelligence (AI) and Data Science' },
   ];
 
   const handleSubmit = async () => {
@@ -84,6 +72,16 @@ const Index = () => {
       return;
     }
 
+    // Validate category
+    if (!['EWS', 'GOPEN'].includes(formData.category)) {
+      toast({
+        title: "Invalid Category",
+        description: "Only EWS and GOPEN categories are supported for DSE.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsAnalyzing(true);
     
     try {
@@ -92,21 +90,23 @@ const Index = () => {
         aggregate: aggregate,
         category: formData.category,
         preferredBranch: formData.preferredBranch,
-        preferredCities: formData.preferredCities
+        preferredCities: [] // Show all cities
       };
 
-      console.log('Analyzing college options for:', studentProfile);
+      console.log('Analyzing DSE college options for:', studentProfile);
       
       const collegeMatches = await analyzeCollegeOptions(studentProfile);
       
-      console.log('AI Analysis Results:', collegeMatches);
+      console.log('DSE Analysis Results:', collegeMatches);
       
       setResults(collegeMatches);
       setShowResults(true);
       
+      const eligibleCount = collegeMatches.filter(college => college.eligible).length;
+      
       toast({
         title: "Analysis Complete!",
-        description: `Found ${collegeMatches.length} matching colleges for ${formData.fullName}.`
+        description: `Found ${collegeMatches.length} colleges (${eligibleCount} eligible) for ${formData.fullName}.`
       });
       
     } catch (error) {
@@ -129,22 +129,6 @@ const Index = () => {
     setCurrentStep(currentStep - 1);
   };
 
-  const toggleCity = (city: string) => {
-    setFormData(prev => {
-      if (prev.preferredCities.includes(city)) {
-        return {
-          ...prev,
-          preferredCities: prev.preferredCities.filter(c => c !== city)
-        };
-      } else {
-        return {
-          ...prev,
-          preferredCities: [...prev.preferredCities, city]
-        };
-      }
-    });
-  };
-
   const refillForm = () => {
     setShowResults(false);
     setCurrentStep(1);
@@ -157,9 +141,9 @@ const Index = () => {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
               <GraduationCap className="h-10 w-10 text-blue-600" />
-              MyDSE Options
+              DSE College Finder 2024
             </h1>
-            <p className="text-gray-600">Personalized college recommendations for {formData.fullName}</p>
+            <p className="text-gray-600">Find eligible CS/IT/AI colleges for {formData.fullName}</p>
           </div>
 
           <CollegeResultsTable 
@@ -178,9 +162,9 @@ const Index = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
             <GraduationCap className="h-10 w-10 text-blue-600" />
-            MyDSE Options
+            DSE College Finder 2024
           </h1>
-          <p className="text-gray-600">Find the best DSE college options based on your profile</p>
+          <p className="text-gray-600">Find eligible CS/IT/AI colleges in Maharashtra</p>
         </div>
 
         <Card>
@@ -188,12 +172,12 @@ const Index = () => {
             <CardTitle className="text-2xl">
               {currentStep === 1 && "Personal Information"}
               {currentStep === 2 && "Academic Details"}
-              {currentStep === 3 && "Preferences"}
+              {currentStep === 3 && "Branch Preference"}
             </CardTitle>
             <CardDescription>
-              {currentStep === 1 && "Tell us a bit about yourself to personalize your college options."}
-              {currentStep === 2 && "Enter your academic scores to match with college cutoffs."}
-              {currentStep === 3 && "Let us know your preferences for branch and location."}
+              {currentStep === 1 && "Tell us about yourself for personalized college recommendations."}
+              {currentStep === 2 && "Enter your percentage and category (EWS/GOPEN only)."}
+              {currentStep === 3 && "Select your preferred CS/IT/AI branch."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -218,7 +202,8 @@ const Index = () => {
                   <Input
                     id="aggregate"
                     type="number"
-                    placeholder="Enter your aggregate percentage"
+                    step="0.01"
+                    placeholder="Enter your percentage (e.g., 82.02)"
                     value={formData.aggregate}
                     onChange={(e) => setFormData({ ...formData, aggregate: e.target.value })}
                   />
@@ -250,26 +235,15 @@ const Index = () => {
                     value={formData.preferredBranch}
                     onChange={(e) => setFormData({ ...formData, preferredBranch: e.target.value })}
                   >
-                    <option value="" disabled>Select your preferred branch</option>
+                    <option value="" disabled>Select your preferred CS/IT/AI branch</option>
                     {branches.map((branch) => (
                       <option key={branch.value} value={branch.value}>{branch.label}</option>
                     ))}
                   </select>
                 </div>
-                <div className="grid gap-2">
-                  <Label>Preferred Cities</Label>
-                  <div className="flex flex-wrap gap-2">
-                    {cities.map((city) => (
-                      <Badge
-                        key={city.value}
-                        variant={formData.preferredCities.includes(city.value) ? "default" : "outline"}
-                        onClick={() => toggleCity(city.value)}
-                        className="cursor-pointer"
-                      >
-                        {city.label}
-                      </Badge>
-                    ))}
-                  </div>
+                <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                  <strong>Note:</strong> Results will show colleges from all cities in Maharashtra. 
+                  Only EWS and GOPEN categories are supported for DSE admissions.
                 </div>
               </div>
             )}
