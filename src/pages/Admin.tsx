@@ -1,11 +1,13 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Upload, FileText, Calendar, Shield, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Upload, FileText, Calendar, Shield, Clock, CheckCircle, XCircle, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import type { User } from '@supabase/supabase-js';
 
 interface UploadedFile {
   id: string;
@@ -25,8 +27,9 @@ interface RecentActivity {
 }
 
 const Admin = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<{[key: number]: File | null}>({
@@ -39,23 +42,63 @@ const Admin = () => {
     2: false,
     3: false
   });
+  const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (credentials.username === 'awej' && credentials.password === 'awej') {
-      setIsLoggedIn(true);
-      toast({
-        title: "Login Successful",
-        description: "Welcome to the admin panel!"
-      });
-    } else {
-      toast({
-        title: "Login Failed",
-        description: "Invalid username or password.",
-        variant: "destructive"
-      });
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.user) {
+        navigate('/admin-auth');
+        return;
+      }
+
+      setUser(session.user);
+      
+      // Check if user is admin
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .eq('role', 'admin')
+        .single();
+
+      if (roleError && roleError.code !== 'PGRST116') {
+        console.error('Error checking admin role:', roleError);
+        toast({
+          title: "Error",
+          description: "Failed to verify admin permissions.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!roleData) {
+        toast({
+          title: "Access Denied",
+          description: "You don't have admin permissions. Please contact the administrator.",
+          variant: "destructive"
+        });
+        navigate('/admin-auth');
+        return;
+      }
+
+      setIsAdmin(true);
+    } catch (error) {
+      console.error('Auth check error:', error);
+      navigate('/admin-auth');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/admin-auth');
   };
 
   const handleFileUpload = async (round: number) => {
@@ -89,13 +132,34 @@ const Admin = () => {
     setUploadingRounds(prev => ({ ...prev, [round]: true }));
     
     try {
-      // Simulate file upload process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      // Upload to Supabase Storage
+      const fileName = `round_${round}_${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('cutoff-uploads')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Record upload in database
+      const { error: dbError } = await supabase
+        .from('uploads')
+        .insert({
+          filename: fileName,
+          category: `Round ${round}`,
+          uploaded_by: user?.id,
+          status: 'Processed'
+        });
+
+      if (dbError) {
+        throw dbError;
+      }
+
       const currentDate = new Date().toLocaleString();
       const fileId = `${round}-${Date.now()}`;
       
-      // Update uploaded files
+      // Update uploaded files state
       const newFile: UploadedFile = {
         id: fileId,
         name: file.name,
@@ -123,12 +187,14 @@ const Admin = () => {
       
       toast({
         title: "File Uploaded Successfully",
-        description: `Round ${round} cutoff data updated on ${currentDate}.`
+        description: `Round ${round} cutoff data uploaded and stored in Supabase.`
       });
       
       setSelectedFiles(prev => ({ ...prev, [round]: null }));
       
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      
       const newActivity: RecentActivity = {
         id: `activity-${Date.now()}`,
         action: 'Upload Failed',
@@ -142,7 +208,7 @@ const Admin = () => {
       
       toast({
         title: "Upload Failed",
-        description: `Failed to upload Round ${round} cutoff file. Please try again.`,
+        description: error.message || `Failed to upload Round ${round} cutoff file. Please try again.`,
         variant: "destructive"
       });
     } finally {
@@ -150,56 +216,32 @@ const Admin = () => {
     }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setCredentials({ username: '', password: '' });
-    toast({
-      title: "Logged Out",
-      description: "You have been logged out successfully."
-    });
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <Shield className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-pulse" />
+          <p className="text-gray-600">Verifying admin access...</p>
+        </div>
+      </div>
+    );
+  }
 
-  if (!isLoggedIn) {
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <Shield className="h-12 w-12 text-blue-600" />
-            </div>
-            <CardTitle className="text-2xl">Admin Panel</CardTitle>
+            <Shield className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <CardTitle className="text-2xl text-red-600">Access Denied</CardTitle>
             <CardDescription>
-              Enter your credentials to access the admin dashboard
+              You don't have admin permissions for this system.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  value={credentials.username}
-                  onChange={(e) => setCredentials(prev => ({...prev, username: e.target.value}))}
-                  placeholder="Enter username"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={credentials.password}
-                  onChange={(e) => setCredentials(prev => ({...prev, password: e.target.value}))}
-                  placeholder="Enter password"
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                Login to Admin Panel
-              </Button>
-            </form>
+            <Button onClick={() => navigate('/admin-auth')} className="w-full">
+              Back to Login
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -216,9 +258,13 @@ const Admin = () => {
               Admin Dashboard
             </h1>
             <p className="text-gray-600 mt-2">Manage cutoff data for MyDSE Options</p>
+            {user && (
+              <p className="text-sm text-gray-500 mt-1">Logged in as: {user.email}</p>
+            )}
           </div>
-          <Button onClick={handleLogout} variant="outline">
-            Logout
+          <Button onClick={handleSignOut} variant="outline" className="flex items-center gap-2">
+            <LogOut className="h-4 w-4" />
+            Sign Out
           </Button>
         </div>
 
@@ -387,10 +433,10 @@ const Admin = () => {
             <div className="space-y-3 text-sm text-gray-600">
               <p>• Upload cutoff files for all three CAP rounds separately</p>
               <p>• Supported file formats: Excel (.xlsx, .xls), CSV (.csv), or PDF (.pdf)</p>
-              <p>• Each round file will be used independently for student queries</p>
+              <p>• Files are securely stored in Supabase Storage</p>
+              <p>• Each round file will be processed and used for student queries</p>
               <p>• Students with aggregate ≥ cutoff for their category will see matching colleges</p>
               <p>• All cities and colleges will be considered if no specific city preference is selected</p>
-              <p>• The system works fine even if only 2 rounds are uploaded</p>
             </div>
           </CardContent>
         </Card>
