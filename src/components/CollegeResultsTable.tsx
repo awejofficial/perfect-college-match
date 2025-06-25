@@ -12,8 +12,18 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { RefreshCw, Download, Check, X } from "lucide-react";
-import { CollegeMatch } from "@/services/deepseekService";
 import { PaginationControls } from "@/components/PaginationControls";
+
+export interface CollegeMatch {
+  collegeName: string;
+  city: string;
+  branch: string;
+  category: string;
+  round: number;
+  cutoff: number;
+  collegeType: string;
+  eligible: boolean;
+}
 
 interface CollegeResultsTableProps {
   results: CollegeMatch[];
