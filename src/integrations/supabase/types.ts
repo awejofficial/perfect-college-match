@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      branch_ids: {
+        Row: {
+          branch_id: string
+          branch_name: string
+          college_id: string | null
+          created_at: string | null
+        }
+        Insert: {
+          branch_id?: string
+          branch_name: string
+          college_id?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          branch_id?: string
+          branch_name?: string
+          college_id?: string | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branch_ids_college_id_fkey"
+            columns: ["college_id"]
+            isOneToOne: false
+            referencedRelation: "college_ids"
+            referencedColumns: ["college_id"]
+          },
+        ]
+      }
+      college_ids: {
+        Row: {
+          college_id: string
+          college_name: string
+          created_at: string | null
+        }
+        Insert: {
+          college_id?: string
+          college_name: string
+          created_at?: string | null
+        }
+        Update: {
+          college_id?: string
+          college_name?: string
+          created_at?: string | null
+        }
+        Relationships: []
+      }
       cutoffs: {
         Row: {
           branch_name: string
