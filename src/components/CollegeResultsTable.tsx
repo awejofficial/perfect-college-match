@@ -19,9 +19,10 @@ export interface CollegeMatch {
   city: string;
   branch: string;
   category: string;
-  round: string;
-  cutoff: number;
   collegeType: string;
+  cap1Cutoff: number | null;
+  cap2Cutoff: number | null;
+  cap3Cutoff: number | null;
   eligible: boolean;
 }
 
@@ -50,7 +51,7 @@ export const CollegeResultsTable: React.FC<CollegeResultsTableProps> = ({
   const currentResults = results.slice(startIndex, endIndex);
 
   const exportToCSV = () => {
-    const headers = ['College Name', 'City', 'Branch', 'Category', 'Round', 'Cutoff (%)', 'College Type', 'Eligible'];
+    const headers = ['College Name', 'City', 'Branch', 'Category', 'College Type', 'CAP1 Cutoff (%)', 'CAP2 Cutoff (%)', 'CAP3 Cutoff (%)', 'Eligible'];
     const csvContent = [
       headers.join(','),
       ...results.map(college => [
@@ -58,9 +59,10 @@ export const CollegeResultsTable: React.FC<CollegeResultsTableProps> = ({
         college.city,
         `"${college.branch}"`,
         college.category,
-        college.round,
-        college.cutoff,
         college.collegeType || 'N/A',
+        college.cap1Cutoff || 'N/A',
+        college.cap2Cutoff || 'N/A',
+        college.cap3Cutoff || 'N/A',
         college.eligible ? 'YES' : 'NO'
       ].join(','))
     ].join('\n');
@@ -124,14 +126,15 @@ export const CollegeResultsTable: React.FC<CollegeResultsTableProps> = ({
                   <TableHead>Branch</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead className="text-center">Round</TableHead>
-                  <TableHead className="text-center">Cutoff (%)</TableHead>
+                  <TableHead className="text-center">CAP1 Cutoff</TableHead>
+                  <TableHead className="text-center">CAP2 Cutoff</TableHead>
+                  <TableHead className="text-center">CAP3 Cutoff</TableHead>
                   <TableHead className="text-center">Eligible</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {currentResults.map((college, index) => (
-                  <TableRow key={`${college.collegeName}-${college.round}-${index}`} className={college.eligible ? 'bg-green-50' : 'bg-red-50'}>
+                  <TableRow key={`${college.collegeName}-${college.branch}-${college.category}-${index}`} className={college.eligible ? 'bg-green-50' : 'bg-red-50'}>
                     <TableCell className="font-medium">{college.collegeName}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{college.city}</Badge>
@@ -145,10 +148,15 @@ export const CollegeResultsTable: React.FC<CollegeResultsTableProps> = ({
                         {college.collegeType || 'N/A'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant="outline">Round {college.round}</Badge>
+                    <TableCell className="text-center font-mono">
+                      {college.cap1Cutoff ? `${college.cap1Cutoff}%` : 'N/A'}
                     </TableCell>
-                    <TableCell className="text-center font-mono">{college.cutoff}%</TableCell>
+                    <TableCell className="text-center font-mono">
+                      {college.cap2Cutoff ? `${college.cap2Cutoff}%` : 'N/A'}
+                    </TableCell>
+                    <TableCell className="text-center font-mono">
+                      {college.cap3Cutoff ? `${college.cap3Cutoff}%` : 'N/A'}
+                    </TableCell>
                     <TableCell className="text-center">
                       {college.eligible ? (
                         <div className="flex items-center justify-center">

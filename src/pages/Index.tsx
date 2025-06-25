@@ -26,10 +26,11 @@ interface CollegeMatch {
   city: string;
   branch: string;
   category: string;
-  round: string;
-  cutoff: number;
-  eligible: boolean;
   collegeType: string;
+  cap1Cutoff: number | null;
+  cap2Cutoff: number | null;
+  cap3Cutoff: number | null;
+  eligible: boolean;
 }
 
 const Index = () => {
@@ -43,7 +44,7 @@ const Index = () => {
     fullName: '',
     aggregate: '',
     category: '',
-    preferredBranch: '',
+    preferredBranches: [] as string[],
     collegeTypes: [] as string[]
   });
 
@@ -88,65 +89,58 @@ const Index = () => {
   };
 
   const processCollegeMatches = (cutoffData: CutoffRecord[], studentAggregate: number): CollegeMatch[] => {
-    const matches: CollegeMatch[] = [];
-
+    // Group by unique combination of college_name, branch_name, category
+    const uniqueCombinations = new Map<string, CutoffRecord>();
+    
     cutoffData.forEach(record => {
-      // Process CAP1 round
-      if (record.cap1_cutoff) {
-        matches.push({
-          collegeName: record.college_name,
-          city: record.city || 'Unknown',
-          branch: record.branch_name,
-          category: record.category,
-          round: 'CAP1',
-          cutoff: record.cap1_cutoff,
-          eligible: studentAggregate >= record.cap1_cutoff,
-          collegeType: record.college_type
-        });
-      }
-
-      // Process CAP2 round if available
-      if (record.cap2_cutoff) {
-        matches.push({
-          collegeName: record.college_name,
-          city: record.city || 'Unknown',
-          branch: record.branch_name,
-          category: record.category,
-          round: 'CAP2',
-          cutoff: record.cap2_cutoff,
-          eligible: studentAggregate >= record.cap2_cutoff,
-          collegeType: record.college_type
-        });
-      }
-
-      // Process CAP3 round if available
-      if (record.cap3_cutoff) {
-        matches.push({
-          collegeName: record.college_name,
-          city: record.city || 'Unknown',
-          branch: record.branch_name,
-          category: record.category,
-          round: 'CAP3',
-          cutoff: record.cap3_cutoff,
-          eligible: studentAggregate >= record.cap3_cutoff,
-          collegeType: record.college_type
-        });
+      const key = `${record.college_name}-${record.branch_name}-${record.category}`;
+      if (!uniqueCombinations.has(key)) {
+        uniqueCombinations.set(key, record);
       }
     });
 
-    // Sort by eligible first, then by cutoff (ascending)
+    const matches: CollegeMatch[] = Array.from(uniqueCombinations.values()).map(record => {
+      // Check eligibility against any available cutoff
+      const eligibleForCap1 = record.cap1_cutoff ? studentAggregate >= record.cap1_cutoff : false;
+      const eligibleForCap2 = record.cap2_cutoff ? studentAggregate >= record.cap2_cutoff : false;
+      const eligibleForCap3 = record.cap3_cutoff ? studentAggregate >= record.cap3_cutoff : false;
+      
+      const eligible = eligibleForCap1 || eligibleForCap2 || eligibleForCap3;
+
+      return {
+        collegeName: record.college_name,
+        city: record.city || 'Unknown',
+        branch: record.branch_name,
+        category: record.category,
+        collegeType: record.college_type,
+        cap1Cutoff: record.cap1_cutoff || null,
+        cap2Cutoff: record.cap2_cutoff || null,
+        cap3Cutoff: record.cap3_cutoff || null,
+        eligible
+      };
+    });
+
+    // Sort by eligible first, then by lowest cutoff available
     return matches.sort((a, b) => {
       if (a.eligible && !b.eligible) return -1;
       if (!a.eligible && b.eligible) return 1;
-      return a.cutoff - b.cutoff;
+      
+      // Get lowest cutoff for sorting
+      const getLowestCutoff = (college: CollegeMatch) => {
+        const cutoffs = [college.cap1Cutoff, college.cap2Cutoff, college.cap3Cutoff]
+          .filter(c => c !== null) as number[];
+        return cutoffs.length > 0 ? Math.min(...cutoffs) : 100;
+      };
+      
+      return getLowestCutoff(a) - getLowestCutoff(b);
     });
   };
 
   const handleSubmit = async () => {
-    if (!formData.fullName || !formData.aggregate || !formData.category || !formData.preferredBranch) {
+    if (!formData.fullName || !formData.aggregate || !formData.category || formData.preferredBranches.length === 0) {
       toast({
         title: "Incomplete Form",
-        description: "Please fill in all required fields.",
+        description: "Please fill in all required fields and select at least one branch.",
         variant: "destructive"
       });
       return;
@@ -165,14 +159,19 @@ const Index = () => {
     setIsAnalyzing(true);
     
     try {
-      // Fetch real cutoff data from database
-      const cutoffData = await fetchCutoffData(
-        formData.category,
-        formData.preferredBranch,
-        formData.collegeTypes.length > 0 ? formData.collegeTypes : undefined
-      );
+      // Fetch data for all selected branches
+      const allCutoffData: CutoffRecord[] = [];
+      
+      for (const branch of formData.preferredBranches) {
+        const branchData = await fetchCutoffData(
+          formData.category,
+          branch,
+          formData.collegeTypes.length > 0 ? formData.collegeTypes : undefined
+        );
+        allCutoffData.push(...branchData);
+      }
 
-      if (cutoffData.length === 0) {
+      if (allCutoffData.length === 0) {
         toast({
           title: "No Data Available",
           description: "No cutoff data found for your selected criteria. Please try different options or contact admin to upload data.",
@@ -182,9 +181,9 @@ const Index = () => {
         return;
       }
 
-      console.log('Processing cutoff data:', cutoffData.length, 'records');
+      console.log('Processing cutoff data:', allCutoffData.length, 'records');
       
-      const collegeMatches = processCollegeMatches(cutoffData, aggregate);
+      const collegeMatches = processCollegeMatches(allCutoffData, aggregate);
       
       console.log('Processed Results:', collegeMatches);
       
@@ -238,6 +237,20 @@ const Index = () => {
       setFormData({
         ...formData,
         collegeTypes: formData.collegeTypes.filter(type => type !== collegeType)
+      });
+    }
+  };
+
+  const handleBranchChange = (branch: string, checked: boolean) => {
+    if (checked) {
+      setFormData({
+        ...formData,
+        preferredBranches: [...formData.preferredBranches, branch]
+      });
+    } else {
+      setFormData({
+        ...formData,
+        preferredBranches: formData.preferredBranches.filter(b => b !== branch)
       });
     }
   };
@@ -323,7 +336,7 @@ const Index = () => {
                 <CardDescription>
                   {currentStep === 1 && "Tell us about yourself for personalized college recommendations."}
                   {currentStep === 2 && "Enter your percentage and category."}
-                  {currentStep === 3 && "Select your preferred branch and college types."}
+                  {currentStep === 3 && "Select your preferred branches and college types."}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -374,18 +387,26 @@ const Index = () => {
                 {currentStep === 3 && (
                   <div className="space-y-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="preferredBranch">Preferred Branch</Label>
-                      <select
-                        id="preferredBranch"
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={formData.preferredBranch}
-                        onChange={(e) => setFormData({ ...formData, preferredBranch: e.target.value })}
-                      >
-                        <option value="" disabled>Select your preferred branch</option>
+                      <Label>Preferred Branches (Select multiple)</Label>
+                      <div className="grid grid-cols-1 gap-3 max-h-40 overflow-y-auto">
                         {branches.map((branch) => (
-                          <option key={branch} value={branch}>{branch}</option>
+                          <div key={branch} className="flex items-center space-x-2">
+                            <input
+                              type="checkbox"
+                              id={branch}
+                              checked={formData.preferredBranches.includes(branch)}
+                              onChange={(e) => handleBranchChange(branch, e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-300"
+                            />
+                            <Label htmlFor={branch} className="text-sm font-normal">
+                              {branch}
+                            </Label>
+                          </div>
                         ))}
-                      </select>
+                      </div>
+                      {formData.preferredBranches.length === 0 && (
+                        <p className="text-sm text-red-500">Please select at least one branch</p>
+                      )}
                     </div>
                     
                     <div className="grid gap-2">
@@ -412,8 +433,8 @@ const Index = () => {
                     </div>
                     
                     <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
-                      <strong>Note:</strong> Results are based on real cutoff data from the database. 
-                      All available cutoff rounds (CAP1, CAP2, CAP3) will be displayed.
+                      <strong>Note:</strong> Results will show unique college-branch-category combinations with 
+                      separate columns for CAP1, CAP2, and CAP3 cutoffs from the database.
                     </div>
                   </div>
                 )}
