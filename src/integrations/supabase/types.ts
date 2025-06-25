@@ -12,7 +12,7 @@ export type Database = {
       cutoffs: {
         Row: {
           branch_name: string
-          cap1_cutoff: number
+          cap1_cutoff: number | null
           cap2_cutoff: number | null
           cap3_cutoff: number | null
           category: string
@@ -25,7 +25,7 @@ export type Database = {
         }
         Insert: {
           branch_name: string
-          cap1_cutoff: number
+          cap1_cutoff?: number | null
           cap2_cutoff?: number | null
           cap3_cutoff?: number | null
           category: string
@@ -38,7 +38,7 @@ export type Database = {
         }
         Update: {
           branch_name?: string
-          cap1_cutoff?: number
+          cap1_cutoff?: number | null
           cap2_cutoff?: number | null
           cap3_cutoff?: number | null
           category?: string
