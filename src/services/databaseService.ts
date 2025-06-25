@@ -6,7 +6,9 @@ export interface CutoffRecord {
   college_name: string;
   branch_name: string;
   category: string;
-  cutoff_value: number;
+  cap1_cutoff: number;
+  cap2_cutoff?: number | null;
+  cap3_cutoff?: number | null;
   city?: string;
   college_type: string;
   year?: number;
@@ -30,7 +32,7 @@ export const fetchCutoffData = async (
     let query = supabase
       .from('cutoffs')
       .select('*')
-      .order('cutoff_value', { ascending: true });
+      .order('cap1_cutoff', { ascending: true });
 
     if (category) {
       query = query.eq('category', category);
@@ -99,7 +101,7 @@ export const fetchPaginatedCutoffs = async (
     let query = supabase
       .from('cutoffs')
       .select('*', { count: 'exact' })
-      .order('cutoff_value', { ascending: true })
+      .order('cap1_cutoff', { ascending: true })
       .range(offset, offset + limit - 1);
 
     if (filters.category) {
@@ -115,7 +117,7 @@ export const fetchPaginatedCutoffs = async (
     }
 
     if (filters.minScore) {
-      query = query.lte('cutoff_value', filters.minScore);
+      query = query.lte('cap1_cutoff', filters.minScore);
     }
 
     const { data, error, count } = await query;

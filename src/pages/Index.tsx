@@ -4,21 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { ChevronRight, ChevronLeft, GraduationCap, MapPin, BookOpen, User, Percent, Users } from "lucide-react";
+import { ChevronRight, ChevronLeft, GraduationCap, User, Users } from "lucide-react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { CollegeResultsTable } from "@/components/CollegeResultsTable";
 import { Footer } from "@/components/Footer";
-import { analyzeCollegeOptions, type CollegeMatch, type StudentProfile } from "@/services/deepseekService";
-import { fetchCutoffData, fetchAvailableBranches, fetchAvailableCollegeTypes } from "@/services/databaseService";
+import { fetchCutoffData, fetchAvailableCollegeTypes, type CutoffRecord } from "@/services/databaseService";
 
 interface Category {
-  value: string;
-  label: string;
-}
-
-interface Branch {
   value: string;
   label: string;
 }
@@ -28,12 +21,22 @@ interface CollegeType {
   label: string;
 }
 
+interface CollegeMatch {
+  collegeName: string;
+  city: string;
+  branch: string;
+  category: string;
+  round: string;
+  cutoff: number;
+  eligible: boolean;
+  collegeType: string;
+}
+
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<CollegeMatch[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [availableBranches, setAvailableBranches] = useState<string[]>([]);
   const [availableCollegeTypes, setAvailableCollegeTypes] = useState<string[]>([]);
   const [isGuest, setIsGuest] = useState(false);
   const [formData, setFormData] = useState({
@@ -45,11 +48,28 @@ const Index = () => {
   });
 
   const categories: Category[] = [
-    { value: 'GOPEN', label: 'GOPEN (General Open)' },
-    { value: 'EWS', label: 'EWS (Economically Weaker Section)' },
-    { value: 'SC', label: 'SC (Scheduled Caste)' },
-    { value: 'ST', label: 'ST (Scheduled Tribe)' },
-    { value: 'OBC', label: 'OBC (Other Backward Class)' },
+    { value: 'GOPEN', label: 'GOPEN' },
+    { value: 'GSC', label: 'GSC' },
+    { value: 'GSEBC', label: 'GSEBC' },
+    { value: 'LOPEN', label: 'LOPEN' },
+    { value: 'LST', label: 'LST' },
+    { value: 'LOBC', label: 'LOBC' },
+    { value: 'EWS', label: 'EWS' },
+    { value: 'GST', label: 'GST' },
+    { value: 'GOBC', label: 'GOBC' },
+    { value: 'LSEBC', label: 'LSEBC' },
+    { value: 'GNTA', label: 'GNTA' },
+    { value: 'LSC', label: 'LSC' },
+  ];
+
+  const branches = [
+    'Civil Engineering',
+    'Computer Science and Engineering',
+    'Information Technology',
+    'Electrical Engineering',
+    'Electronics and Telecommunication Engg',
+    'Instrumentation Engineering',
+    'Mechanical Engineering'
   ];
 
   const collegeTypeOptions: CollegeType[] = [
@@ -63,13 +83,63 @@ const Index = () => {
   }, []);
 
   const loadAvailableOptions = async () => {
-    const [branches, collegeTypes] = await Promise.all([
-      fetchAvailableBranches(),
-      fetchAvailableCollegeTypes()
-    ]);
-    
-    setAvailableBranches(branches);
+    const collegeTypes = await fetchAvailableCollegeTypes();
     setAvailableCollegeTypes(collegeTypes);
+  };
+
+  const processCollegeMatches = (cutoffData: CutoffRecord[], studentAggregate: number): CollegeMatch[] => {
+    const matches: CollegeMatch[] = [];
+
+    cutoffData.forEach(record => {
+      // Process CAP1 round
+      if (record.cap1_cutoff) {
+        matches.push({
+          collegeName: record.college_name,
+          city: record.city || 'Unknown',
+          branch: record.branch_name,
+          category: record.category,
+          round: 'CAP1',
+          cutoff: record.cap1_cutoff,
+          eligible: studentAggregate >= record.cap1_cutoff,
+          collegeType: record.college_type
+        });
+      }
+
+      // Process CAP2 round if available
+      if (record.cap2_cutoff) {
+        matches.push({
+          collegeName: record.college_name,
+          city: record.city || 'Unknown',
+          branch: record.branch_name,
+          category: record.category,
+          round: 'CAP2',
+          cutoff: record.cap2_cutoff,
+          eligible: studentAggregate >= record.cap2_cutoff,
+          collegeType: record.college_type
+        });
+      }
+
+      // Process CAP3 round if available
+      if (record.cap3_cutoff) {
+        matches.push({
+          collegeName: record.college_name,
+          city: record.city || 'Unknown',
+          branch: record.branch_name,
+          category: record.category,
+          round: 'CAP3',
+          cutoff: record.cap3_cutoff,
+          eligible: studentAggregate >= record.cap3_cutoff,
+          collegeType: record.college_type
+        });
+      }
+    });
+
+    // Sort by eligible first, then by cutoff (ascending)
+    return matches.sort((a, b) => {
+      if (a.eligible && !b.eligible) return -1;
+      if (!a.eligible && b.eligible) return 1;
+      return a.cutoff - b.cutoff;
+    });
   };
 
   const handleSubmit = async () => {
@@ -112,32 +182,11 @@ const Index = () => {
         return;
       }
 
-      const studentProfile: StudentProfile = {
-        fullName: formData.fullName,
-        aggregate: aggregate,
-        category: formData.category,
-        preferredBranch: formData.preferredBranch,
-        preferredCities: [],
-        collegeTypes: formData.collegeTypes
-      };
-
-      console.log('Analyzing DSE college options for:', studentProfile);
-      console.log('Using cutoff data:', cutoffData.length, 'records');
+      console.log('Processing cutoff data:', cutoffData.length, 'records');
       
-      // Convert database format to service format
-      const formattedCutoffData = cutoffData.map(record => ({
-        collegeName: record.college_name,
-        branchName: record.branch_name,
-        category: record.category,
-        cutoffValue: record.cutoff_value,
-        city: record.city || 'Unknown',
-        collegeType: record.college_type,
-        year: record.year || 2024
-      }));
-
-      const collegeMatches = await analyzeCollegeOptions(studentProfile, formattedCutoffData);
+      const collegeMatches = processCollegeMatches(cutoffData, aggregate);
       
-      console.log('DSE Analysis Results:', collegeMatches);
+      console.log('Processed Results:', collegeMatches);
       
       setResults(collegeMatches);
       setShowResults(true);
@@ -146,7 +195,7 @@ const Index = () => {
       
       toast({
         title: "Analysis Complete!",
-        description: `Found ${collegeMatches.length} colleges (${eligibleCount} eligible) for ${formData.fullName}.`
+        description: `Found ${collegeMatches.length} college options (${eligibleCount} eligible) for ${formData.fullName}.`
       });
       
     } catch (error) {
@@ -333,7 +382,7 @@ const Index = () => {
                         onChange={(e) => setFormData({ ...formData, preferredBranch: e.target.value })}
                       >
                         <option value="" disabled>Select your preferred branch</option>
-                        {availableBranches.map((branch) => (
+                        {branches.map((branch) => (
                           <option key={branch} value={branch}>{branch}</option>
                         ))}
                       </select>
@@ -363,8 +412,8 @@ const Index = () => {
                     </div>
                     
                     <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
-                      <strong>Note:</strong> Results are based on real cutoff data uploaded by admins. 
-                      Data availability depends on what has been uploaded to the system.
+                      <strong>Note:</strong> Results are based on real cutoff data from the database. 
+                      All available cutoff rounds (CAP1, CAP2, CAP3) will be displayed.
                     </div>
                   </div>
                 )}
