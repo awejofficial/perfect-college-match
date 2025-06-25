@@ -125,33 +125,6 @@ export type Database = {
         }
         Relationships: []
       }
-      uploads: {
-        Row: {
-          category: string
-          filename: string
-          id: string
-          status: string | null
-          uploaded_at: string | null
-          uploaded_by: string | null
-        }
-        Insert: {
-          category: string
-          filename: string
-          id?: string
-          status?: string | null
-          uploaded_at?: string | null
-          uploaded_by?: string | null
-        }
-        Update: {
-          category?: string
-          filename?: string
-          id?: string
-          status?: string | null
-          uploaded_at?: string | null
-          uploaded_by?: string | null
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           id: string
