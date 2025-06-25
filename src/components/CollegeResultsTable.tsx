@@ -19,7 +19,7 @@ export interface CollegeMatch {
   city: string;
   branch: string;
   category: string;
-  round: number;
+  round: string;
   cutoff: number;
   collegeType: string;
   eligible: boolean;
