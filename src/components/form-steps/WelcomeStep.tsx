@@ -14,10 +14,10 @@ export const WelcomeStep: React.FC<WelcomeStepProps> = ({
   onEmailLogin
 }) => {
   return (
-    <Card className="mb-6">
+    <Card className="metal-card mb-6">
       <CardHeader className="text-center">
-        <CardTitle>Welcome to DSE College Finder</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-white">Welcome to DSE College Finder</CardTitle>
+        <CardDescription className="text-white/70">
           Choose how you'd like to proceed
         </CardDescription>
       </CardHeader>
@@ -26,20 +26,20 @@ export const WelcomeStep: React.FC<WelcomeStepProps> = ({
           <Button 
             onClick={onGuestAccess}
             variant="outline"
-            className="h-auto p-4 flex flex-col items-center gap-2"
+            className="metal-button-outline h-auto p-4 flex flex-col items-center gap-2"
           >
             <User className="h-6 w-6" />
             <span className="font-medium">Continue as Guest</span>
-            <span className="text-xs text-gray-500">Quick search without saving</span>
+            <span className="text-xs text-white/60">Quick search without saving</span>
           </Button>
           
           <Button 
             onClick={onEmailLogin}
-            className="h-auto p-4 flex flex-col items-center gap-2"
+            className="metal-button h-auto p-4 flex flex-col items-center gap-2"
           >
             <Users className="h-6 w-6" />
-            <span className="font-medium">Login with Email</span>
-            <span className="text-xs text-gray-200">Save searches & get full features</span>
+            <span className="font-medium">Login with Account</span>
+            <span className="text-xs text-white/80">Save searches & get full features</span>
           </Button>
         </div>
       </CardContent>

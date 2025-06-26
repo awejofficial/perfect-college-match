@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import AdminAuth from "./pages/AdminAuth";
 import AdminPanel from "./pages/AdminPanel";
+import UserAuth from "./pages/UserAuth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -31,6 +32,7 @@ const App: React.FC = () => {
             <main className="flex-1">
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<UserAuth />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/admin-auth" element={<AdminAuth />} />
                 <Route path="/admin-panel" element={<AdminPanel />} />

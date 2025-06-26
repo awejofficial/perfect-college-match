@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { GraduationCap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -313,7 +312,7 @@ const Index = () => {
   };
 
   const handleEmailLogin = () => {
-    window.location.href = '/admin-auth';
+    window.location.href = '/auth';
   };
 
   const handleCollegeTypeChange = (collegeType: string, checked: boolean) => {
