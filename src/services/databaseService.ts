@@ -14,15 +14,6 @@ export interface CutoffRecord {
   year?: number;
 }
 
-export interface UploadRecord {
-  id: string;
-  filename: string;
-  category: string;
-  status: string;
-  uploaded_at: string;
-  uploaded_by?: string;
-}
-
 export interface CollegeWithBranches {
   college_id: string;
   college_name: string;
@@ -66,31 +57,6 @@ export const fetchCutoffData = async (
     return data || [];
   } catch (error) {
     console.error('Failed to fetch cutoff data:', error);
-    return [];
-  }
-};
-
-export const fetchUploadHistory = async (userId?: string): Promise<UploadRecord[]> => {
-  try {
-    let query = supabase
-      .from('uploads')
-      .select('*')
-      .order('uploaded_at', { ascending: false });
-
-    if (userId) {
-      query = query.eq('uploaded_by', userId);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Database error:', error);
-      return [];
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error('Failed to fetch upload history:', error);
     return [];
   }
 };
@@ -216,7 +182,12 @@ export const fetchCollegesWithBranches = async (): Promise<CollegeWithBranches[]
       return [];
     }
 
-    return data || [];
+    return (data || []).map(item => ({
+      college_id: item.college_id,
+      college_name: item.college_name,
+      college_type: item.college_type,
+      branches: Array.isArray(item.branches) ? item.branches : []
+    }));
   } catch (error) {
     console.error('Failed to fetch colleges with branches:', error);
     return [];

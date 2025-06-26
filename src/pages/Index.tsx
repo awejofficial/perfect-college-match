@@ -1,14 +1,17 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { GraduationCap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { ChevronRight, ChevronLeft, GraduationCap, User, Users } from "lucide-react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { CollegeResultsTable } from "@/components/CollegeResultsTable";
 import { Footer } from "@/components/Footer";
+import { 
+  WelcomeStep,
+  PersonalInfoStep,
+  AcademicDetailsStep,
+  PreferencesStep,
+  FormStepper
+} from "@/components/form-steps";
 import { 
   fetchCutoffData, 
   fetchAvailableCollegeTypes, 
@@ -227,6 +230,10 @@ const Index = () => {
     setFormData({ ...formData, fullName: 'Guest User' });
   };
 
+  const handleEmailLogin = () => {
+    window.location.href = '/admin-auth';
+  };
+
   const handleCollegeTypeChange = (collegeType: string, checked: boolean) => {
     if (checked) {
       setFormData({
@@ -304,193 +311,50 @@ const Index = () => {
           </div>
 
           {!isGuest && currentStep === 1 && (
-            <Card className="mb-6">
-              <CardHeader className="text-center">
-                <CardTitle>Welcome to DSE College Finder</CardTitle>
-                <CardDescription>
-                  Choose how you'd like to proceed
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Button 
-                    onClick={handleGuestAccess}
-                    variant="outline"
-                    className="h-auto p-4 flex flex-col items-center gap-2"
-                  >
-                    <User className="h-6 w-6" />
-                    <span className="font-medium">Continue as Guest</span>
-                    <span className="text-xs text-gray-500">Quick search without saving</span>
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => window.location.href = '/admin-auth'}
-                    className="h-auto p-4 flex flex-col items-center gap-2"
-                  >
-                    <Users className="h-6 w-6" />
-                    <span className="font-medium">Login with Email</span>
-                    <span className="text-xs text-gray-200">Save searches & get full features</span>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <WelcomeStep 
+              onGuestAccess={handleGuestAccess}
+              onEmailLogin={handleEmailLogin}
+            />
           )}
 
           {(isGuest || currentStep > 1) && (
-            <Card>
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl">
-                  {currentStep === 1 && "Personal Information"}
-                  {currentStep === 2 && "Academic Details"}
-                  {currentStep === 3 && "Branch & College Preferences"}
-                </CardTitle>
-                <CardDescription>
-                  {currentStep === 1 && "Tell us about yourself for personalized college recommendations."}
-                  {currentStep === 2 && "Enter your percentage and category."}
-                  {currentStep === 3 && "Select your preferred branches and college types."}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {(currentStep === 1 && isGuest) && (
-                  <div className="space-y-2">
-                    <div className="grid gap-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        placeholder="Enter your full name"
-                        value={formData.fullName}
-                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {currentStep === 2 && (
-                  <div className="space-y-2">
-                    <div className="grid gap-2">
-                      <Label htmlFor="aggregate">Aggregate Percentage</Label>
-                      <Input
-                        id="aggregate"
-                        type="number"
-                        step="0.01"
-                        placeholder="Enter your percentage (e.g., 82.02)"
-                        value={formData.aggregate}
-                        onChange={(e) => setFormData({ ...formData, aggregate: e.target.value })}
-                      />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="category">Category</Label>
-                      <select
-                        id="category"
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      >
-                        <option value="" disabled>Select your category</option>
-                        {availableCategories.map((category) => (
-                          <option key={category} value={category}>{category}</option>
-                        ))}
-                      </select>
-                      {availableCategories.length === 0 && (
-                        <p className="text-sm text-yellow-600">No categories available. Please contact admin to upload cutoff data.</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {currentStep === 3 && (
-                  <div className="space-y-4">
-                    <div className="grid gap-2">
-                      <Label>Preferred Branches (Select multiple)</Label>
-                      <div className="grid grid-cols-1 gap-3 max-h-40 overflow-y-auto">
-                        {availableBranches.map((branch) => (
-                          <div key={branch} className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              id={branch}
-                              checked={formData.preferredBranches.includes(branch)}
-                              onChange={(e) => handleBranchChange(branch, e.target.checked)}
-                              className="h-4 w-4 rounded border-gray-300"
-                            />
-                            <Label htmlFor={branch} className="text-sm font-normal">
-                              {branch}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {formData.preferredBranches.length === 0 && (
-                        <p className="text-sm text-red-500">Please select at least one branch</p>
-                      )}
-                      {availableBranches.length === 0 && (
-                        <p className="text-sm text-yellow-600">No branches available. Please contact admin to upload cutoff data.</p>
-                      )}
-                    </div>
-                    
-                    <div className="grid gap-2">
-                      <Label>College Types (Select all that apply)</Label>
-                      <div className="grid grid-cols-1 gap-3">
-                        {collegeTypeOptions.map((type) => (
-                          <div key={type.value} className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
-                              id={type.value}
-                              checked={formData.collegeTypes.includes(type.value)}
-                              onChange={(e) => handleCollegeTypeChange(type.value, e.target.checked)}
-                              className="h-4 w-4 rounded border-gray-300"
-                            />
-                            <Label htmlFor={type.value} className="text-sm font-normal">
-                              {type.label}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                      {formData.collegeTypes.length === 0 && (
-                        <p className="text-sm text-gray-500">No selection will include all college types</p>
-                      )}
-                    </div>
-                    
-                    <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
-                      <strong>Note:</strong> Results will show unique college-branch-category combinations with 
-                      separate columns for CAP1, CAP2, and CAP3 cutoffs from the database.
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {(isGuest || currentStep > 1) && (
-            <div className="flex justify-between mt-4">
-              {currentStep > 1 ? (
-                <Button variant="secondary" onClick={handlePrev}>
-                  <ChevronLeft className="w-4 h-4 mr-2" />
-                  Previous
-                </Button>
-              ) : (
-                <div></div>
+            <>
+              {(currentStep === 1 && isGuest) && (
+                <PersonalInfoStep
+                  fullName={formData.fullName}
+                  onFullNameChange={(value) => setFormData({ ...formData, fullName: value })}
+                />
               )}
 
-              {currentStep < 3 ? (
-                <Button onClick={handleNext}>
-                  Next
-                  <ChevronRight className="w-4 h-4 ml-2" />
-                </Button>
-              ) : (
-                <Button onClick={handleSubmit} disabled={isAnalyzing}>
-                  {isAnalyzing ? (
-                    <>
-                      Analyzing...
-                      <LoadingSpinner />
-                    </>
-                  ) : (
-                    <>
-                      Find Colleges
-                      <GraduationCap className="w-4 h-4 ml-2" />
-                    </>
-                  )}
-                </Button>
+              {currentStep === 2 && (
+                <AcademicDetailsStep
+                  aggregate={formData.aggregate}
+                  category={formData.category}
+                  availableCategories={availableCategories}
+                  onAggregateChange={(value) => setFormData({ ...formData, aggregate: value })}
+                  onCategoryChange={(value) => setFormData({ ...formData, category: value })}
+                />
               )}
-            </div>
+
+              {currentStep === 3 && (
+                <PreferencesStep
+                  preferredBranches={formData.preferredBranches}
+                  collegeTypes={formData.collegeTypes}
+                  availableBranches={availableBranches}
+                  collegeTypeOptions={collegeTypeOptions}
+                  onBranchChange={handleBranchChange}
+                  onCollegeTypeChange={handleCollegeTypeChange}
+                />
+              )}
+
+              <FormStepper
+                currentStep={currentStep}
+                isAnalyzing={isAnalyzing}
+                onNext={handleNext}
+                onPrev={handlePrev}
+                onSubmit={handleSubmit}
+              />
+            </>
           )}
         </div>
       </div>
