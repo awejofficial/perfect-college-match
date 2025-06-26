@@ -149,32 +149,64 @@ const Index = () => {
     });
   };
 
-  const handleSubmit = async () => {
-    // Get all selected branches from college selections
-    const allSelectedBranches = formData.collegeSelections.flatMap(selection => selection.selectedBranches);
+  const validateForm = () => {
+    const errors = [];
     
-    if (!formData.fullName || !formData.aggregate || !formData.category || allSelectedBranches.length === 0) {
+    if (!formData.fullName.trim()) {
+      errors.push("Full name is required");
+    }
+    
+    if (!formData.aggregate || isNaN(parseFloat(formData.aggregate))) {
+      errors.push("Valid aggregate percentage is required");
+    } else {
+      const aggregate = parseFloat(formData.aggregate);
+      if (aggregate < 0 || aggregate > 100) {
+        errors.push("Aggregate percentage must be between 0 and 100");
+      }
+    }
+    
+    if (!formData.category) {
+      errors.push("Category selection is required");
+    }
+    
+    if (formData.selectedColleges.length === 0) {
+      errors.push("At least one college must be selected");
+    }
+    
+    const totalSelectedBranches = formData.collegeSelections.reduce(
+      (total, selection) => total + selection.selectedBranches.length, 0
+    );
+    
+    if (totalSelectedBranches === 0) {
+      errors.push("At least one branch must be selected from your chosen colleges");
+    }
+    
+    return errors;
+  };
+
+  const handleSubmit = async () => {
+    const errors = validateForm();
+    
+    if (errors.length > 0) {
       toast({
         title: "Incomplete Form",
-        description: "Please fill in all required fields, select colleges, and select at least one branch.",
+        description: errors.join(". "),
         variant: "destructive"
       });
       return;
     }
 
     const aggregate = parseFloat(formData.aggregate);
-    if (isNaN(aggregate) || aggregate < 0 || aggregate > 100) {
-      toast({
-        title: "Invalid Percentage",
-        description: "Please enter a valid percentage between 0 and 100.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsAnalyzing(true);
     
     try {
+      // Get all selected branches from college selections
+      const allSelectedBranches = formData.collegeSelections.flatMap(selection => selection.selectedBranches);
+      
+      console.log('Fetching data for branches:', allSelectedBranches);
+      console.log('Category:', formData.category);
+      console.log('College types filter:', formData.collegeTypes);
+      
       // Fetch data for all selected branches
       const allCutoffData: CutoffRecord[] = [];
       
@@ -187,21 +219,20 @@ const Index = () => {
         allCutoffData.push(...branchData);
       }
 
+      console.log('Total cutoff records found:', allCutoffData.length);
+
       if (allCutoffData.length === 0) {
         toast({
           title: "No Data Available",
-          description: "No cutoff data found for your selected criteria. Please try different options or contact admin to upload data.",
+          description: "No cutoff data found for your selected criteria. Try different options or contact admin.",
           variant: "destructive"
         });
         setIsAnalyzing(false);
         return;
       }
 
-      console.log('Processing cutoff data:', allCutoffData.length, 'records');
-      
       const collegeMatches = processCollegeMatches(allCutoffData, aggregate);
-      
-      console.log('Processed Results:', collegeMatches);
+      console.log('Processed matches:', collegeMatches.length);
       
       setResults(collegeMatches);
       setShowResults(true);
@@ -226,6 +257,35 @@ const Index = () => {
   };
 
   const handleNext = () => {
+    // Validate current step before proceeding
+    if (currentStep === 1 && isGuest && !formData.fullName.trim()) {
+      toast({
+        title: "Name Required",
+        description: "Please enter your full name to continue.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (currentStep === 2) {
+      const errors = [];
+      if (!formData.aggregate || isNaN(parseFloat(formData.aggregate))) {
+        errors.push("Valid aggregate percentage is required");
+      }
+      if (!formData.category) {
+        errors.push("Category selection is required");
+      }
+      
+      if (errors.length > 0) {
+        toast({
+          title: "Required Fields Missing",
+          description: errors.join(". "),
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
     setCurrentStep(currentStep + 1);
   };
 
@@ -236,6 +296,16 @@ const Index = () => {
   const refillForm = () => {
     setShowResults(false);
     setCurrentStep(1);
+    setFormData({
+      fullName: '',
+      aggregate: '',
+      category: '',
+      preferredBranches: [],
+      collegeTypes: [],
+      selectedColleges: [],
+      collegeSelections: []
+    });
+    setIsGuest(false);
   };
 
   const handleGuestAccess = () => {
@@ -285,7 +355,13 @@ const Index = () => {
                 <GraduationCap className="h-10 w-10 text-blue-600" />
                 DSE College Finder 2024
               </h1>
-              <p className="text-gray-600">Find eligible colleges for {formData.fullName}</p>
+              <div className="text-gray-600 space-y-1">
+                <p>College Eligibility Results for <strong>{formData.fullName}</strong></p>
+                <div className="text-sm bg-white/60 rounded-lg p-3 inline-block">
+                  <p><strong>Aggregate:</strong> {formData.aggregate}% | <strong>Category:</strong> {formData.category}</p>
+                  <p><strong>Colleges:</strong> {formData.selectedColleges.length} | <strong>Branches:</strong> {formData.collegeSelections.reduce((total, sel) => total + sel.selectedBranches.length, 0)}</p>
+                </div>
+              </div>
             </div>
 
             <CollegeResultsTable 

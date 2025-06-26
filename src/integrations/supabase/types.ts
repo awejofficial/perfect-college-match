@@ -193,17 +193,46 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_all_college_names: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          college_name: string
+        }[]
+      }
       get_available_categories: {
         Args: Record<PropertyKey, never>
         Returns: {
           category: string
         }[]
       }
+      get_branches_for_colleges: {
+        Args: { college_names: string[] }
+        Returns: {
+          college_name: string
+          branch_name: string
+        }[]
+      }
       get_college_type: {
         Args: { college_name_param: string }
         Returns: string
       }
+      get_college_types_for_colleges: {
+        Args: { college_names: string[] }
+        Returns: {
+          college_name: string
+          college_type: string
+        }[]
+      }
       get_colleges_with_branches: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          college_id: string
+          college_name: string
+          college_type: string
+          branches: Json
+        }[]
+      }
+      get_colleges_with_branches_and_types: {
         Args: Record<PropertyKey, never>
         Returns: {
           college_id: string
