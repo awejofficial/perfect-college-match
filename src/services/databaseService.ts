@@ -8,7 +8,7 @@ export interface CutoffRecord {
   category: string;
   cap1_cutoff: number;
   cap2_cutoff?: number | null;
-  cap3_cutoff?: number | null;
+  cap3_cutoff?: number | null;  
   city?: string;
   college_type: string;
   year?: number;
@@ -22,6 +22,16 @@ export interface CollegeWithBranches {
     branch_id: string;
     branch_name: string;
   }>;
+}
+
+// Add UploadRecord interface for compatibility
+export interface UploadRecord {
+  id: string;
+  filename: string;
+  category: string;
+  uploaded_at: string;
+  status: string;
+  uploaded_by?: string;
 }
 
 export const fetchCutoffData = async (
@@ -186,10 +196,19 @@ export const fetchCollegesWithBranches = async (): Promise<CollegeWithBranches[]
       college_id: item.college_id,
       college_name: item.college_name,
       college_type: item.college_type,
-      branches: Array.isArray(item.branches) ? item.branches : []
+      branches: Array.isArray(item.branches) ? item.branches.map(branch => ({
+        branch_id: typeof branch === 'object' && branch !== null && 'branch_id' in branch ? String(branch.branch_id) : '',
+        branch_name: typeof branch === 'object' && branch !== null && 'branch_name' in branch ? String(branch.branch_name) : ''
+      })) : []
     }));
   } catch (error) {
     console.error('Failed to fetch colleges with branches:', error);
     return [];
   }
+};
+
+// Add fetchUploadHistory function for compatibility (returns empty array since uploads table doesn't exist)
+export const fetchUploadHistory = async (userId?: string): Promise<UploadRecord[]> => {
+  console.log('Upload history functionality not implemented - uploads table does not exist');
+  return [];
 };

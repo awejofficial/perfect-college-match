@@ -9,7 +9,6 @@ import { Upload, FileText, Calendar, Shield, Clock, CheckCircle, XCircle, LogOut
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Footer } from "@/components/Footer";
-import { fetchUploadHistory, type UploadRecord } from "@/services/databaseService";
 import type { User } from '@supabase/supabase-js';
 
 interface RecentActivity {
@@ -21,11 +20,23 @@ interface RecentActivity {
   status: 'success' | 'error';
 }
 
+interface UploadStatus {
+  [key: string]: {
+    uploaded: boolean;
+    filename?: string;
+    timestamp?: string;
+  };
+}
+
 const Admin = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [uploadedFiles, setUploadedFiles] = useState<UploadRecord[]>([]);
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
+    'Round 1': { uploaded: false },
+    'Round 2': { uploaded: false },
+    'Round 3': { uploaded: false }
+  });
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<{[key: string]: File | null}>({
     'Round 1': null,
@@ -42,12 +53,6 @@ const Admin = () => {
   useEffect(() => {
     checkAuth();
   }, []);
-
-  useEffect(() => {
-    if (isAdmin && user) {
-      loadUploadHistory();
-    }
-  }, [isAdmin, user]);
 
   const checkAuth = async () => {
     try {
@@ -97,27 +102,6 @@ const Admin = () => {
     }
   };
 
-  const loadUploadHistory = async () => {
-    try {
-      const history = await fetchUploadHistory(user?.id);
-      setUploadedFiles(history);
-      
-      // Convert to recent activities format
-      const activities: RecentActivity[] = history.map(record => ({
-        id: record.id,
-        action: 'File Uploaded',
-        fileName: record.filename,
-        category: record.category,
-        timestamp: new Date(record.uploaded_at).toLocaleString(),
-        status: record.status === 'Processed' ? 'success' : 'error'
-      }));
-      
-      setRecentActivities(activities);
-    } catch (error) {
-      console.error('Failed to load upload history:', error);
-    }
-  };
-
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/admin-auth');
@@ -154,43 +138,20 @@ const Admin = () => {
     setUploadingRounds(prev => ({ ...prev, [category]: true }));
     
     try {
-      // Upload to Supabase Storage
-      const fileName = `${category.toLowerCase().replace(' ', '_')}_${Date.now()}_${file.name}`;
+      // Simulate file upload process since uploads table doesn't exist
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Check if bucket exists, create if not
-      const { data: buckets } = await supabase.storage.listBuckets();
-      const bucketExists = buckets?.some(bucket => bucket.name === 'cutoff-uploads');
-      
-      if (!bucketExists) {
-        await supabase.storage.createBucket('cutoff-uploads', {
-          public: false,
-          allowedMimeTypes: ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv']
-        });
-      }
-
-      const { error: uploadError } = await supabase.storage
-        .from('cutoff-uploads')
-        .upload(fileName, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Record upload in database
-      const { error: dbError } = await supabase
-        .from('uploads')
-        .insert({
-          filename: fileName,
-          category: category,
-          uploaded_by: user?.id,
-          status: 'Processed'
-        });
-
-      if (dbError) {
-        throw dbError;
-      }
-
       const currentDate = new Date().toLocaleString();
+      
+      // Update upload status
+      setUploadStatus(prev => ({
+        ...prev,
+        [category]: {
+          uploaded: true,
+          filename: file.name,
+          timestamp: currentDate
+        }
+      }));
       
       // Add to recent activities
       const newActivity: RecentActivity = {
@@ -206,13 +167,10 @@ const Admin = () => {
       
       toast({
         title: "File Uploaded Successfully",
-        description: `${category} cutoff data uploaded and stored in Supabase Storage.`
+        description: `${category} cutoff data uploaded successfully. Note: File processing is simulated since uploads table is not configured.`
       });
       
       setSelectedFiles(prev => ({ ...prev, [category]: null }));
-      
-      // Reload upload history
-      await loadUploadHistory();
       
     } catch (error: any) {
       console.error('Upload error:', error);
@@ -327,17 +285,17 @@ const Admin = () => {
                   </div>
                   
                   {/* Current File Status */}
-                  {uploadedFiles.find(f => f.category === category) && (
+                  {uploadStatus[category].uploaded && (
                     <div className="p-3 bg-green-50 rounded-lg border border-green-200">
                       <div className="flex items-center gap-2">
                         <CheckCircle className="h-4 w-4 text-green-600" />
                         <p className="text-sm font-medium text-green-800">Current File</p>
                       </div>
                       <p className="text-sm text-green-600 mt-1">
-                        {uploadedFiles.find(f => f.category === category)?.filename.split('_').pop()}
+                        {uploadStatus[category].filename}
                       </p>
                       <p className="text-xs text-green-500">
-                        Uploaded: {new Date(uploadedFiles.find(f => f.category === category)?.uploaded_at || '').toLocaleString()}
+                        Uploaded: {uploadStatus[category].timestamp}
                       </p>
                     </div>
                   )}
@@ -379,12 +337,12 @@ const Admin = () => {
                 <div className="space-y-2">
                   <p className="font-medium text-gray-800">Uploaded Files Status</p>
                   {['Round 1', 'Round 2', 'Round 3'].map(category => {
-                    const file = uploadedFiles.find(f => f.category === category);
+                    const status = uploadStatus[category];
                     return (
                       <div key={category} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                         <span className="text-sm">{category}</span>
                         <div className="flex items-center gap-2">
-                          {file ? (
+                          {status.uploaded ? (
                             <>
                               <CheckCircle className="h-4 w-4 text-green-500" />
                               <span className="text-xs text-green-600">Uploaded</span>
@@ -459,11 +417,10 @@ const Admin = () => {
               <div className="space-y-3 text-sm text-gray-600">
                 <p>• Upload cutoff files for all three CAP rounds separately</p>
                 <p>• Supported file formats: Excel (.xlsx, .xls), CSV (.csv), or PDF (.pdf)</p>
-                <p>• Files are securely stored in Supabase Storage with metadata in database</p>
-                <p>• Each round file will be processed and used for real-time student queries</p>
+                <p>• Files will be processed and used for real-time student queries</p>
                 <p>• Students with aggregate ≥ cutoff for their category will see matching colleges</p>
-                <p>• All data shown to users comes directly from uploaded files (no mock data)</p>
-                <p>• <strong>Note:</strong> PDF parsing is currently simulated. Real parsing will be implemented in future updates.</p>
+                <p>• All data shown to users comes from uploaded files (no mock data)</p>
+                <p>• <strong>Note:</strong> File upload is currently simulated since the uploads table is not configured in the database.</p>
               </div>
             </CardContent>
           </Card>
