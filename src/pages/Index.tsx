@@ -17,6 +17,7 @@ import {
   fetchAvailableCollegeTypes, 
   fetchAvailableCategories,
   fetchAvailableBranches,
+  fetchAllCollegeNames,
   type CutoffRecord 
 } from "@/services/databaseService";
 
@@ -169,16 +170,8 @@ const Index = () => {
       errors.push("Category selection is required");
     }
     
-    if (formData.selectedColleges.length === 0) {
-      errors.push("At least one college must be selected");
-    }
-    
-    const totalSelectedBranches = formData.collegeSelections.reduce(
-      (total, selection) => total + selection.selectedBranches.length, 0
-    );
-    
-    if (totalSelectedBranches === 0) {
-      errors.push("At least one branch must be selected from your chosen colleges");
+    if (formData.preferredBranches.length === 0) {
+      errors.push("At least one branch must be selected");
     }
     
     return errors;
@@ -200,17 +193,23 @@ const Index = () => {
     setIsAnalyzing(true);
     
     try {
-      // Get all selected branches from college selections
-      const allSelectedBranches = formData.collegeSelections.flatMap(selection => selection.selectedBranches);
-      
-      console.log('Fetching data for branches:', allSelectedBranches);
+      // Use all colleges if none selected specifically
+      let collegesToSearch = formData.selectedColleges;
+      if (collegesToSearch.length === 0) {
+        // Auto-select all available colleges
+        const allColleges = await fetchAllCollegeNames();
+        collegesToSearch = allColleges;
+      }
+
+      console.log('Fetching data for branches:', formData.preferredBranches);
       console.log('Category:', formData.category);
       console.log('College types filter:', formData.collegeTypes);
+      console.log('Colleges to search:', collegesToSearch.length);
       
       // Fetch data for all selected branches
       const allCutoffData: CutoffRecord[] = [];
       
-      for (const branch of allSelectedBranches) {
+      for (const branch of formData.preferredBranches) {
         const branchData = await fetchCutoffData(
           formData.category,
           branch,
@@ -347,19 +346,21 @@ const Index = () => {
 
   if (showResults) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+      <div className="min-h-screen flex flex-col">
         <div className="flex-1 p-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
-                <GraduationCap className="h-10 w-10 text-blue-600" />
-                DSE College Finder 2024
-              </h1>
-              <div className="text-gray-600 space-y-1">
-                <p>College Eligibility Results for <strong>{formData.fullName}</strong></p>
-                <div className="text-sm bg-white/60 rounded-lg p-3 inline-block">
-                  <p><strong>Aggregate:</strong> {formData.aggregate}% | <strong>Category:</strong> {formData.category}</p>
-                  <p><strong>Colleges:</strong> {formData.selectedColleges.length} | <strong>Branches:</strong> {formData.collegeSelections.reduce((total, sel) => total + sel.selectedBranches.length, 0)}</p>
+              <div className="glass-card rounded-2xl p-6 mb-6 border-0">
+                <h1 className="text-4xl font-bold text-white mb-2 flex items-center justify-center gap-2">
+                  <GraduationCap className="h-10 w-10 text-blue-300" />
+                  DSE College Finder 2024
+                </h1>
+                <div className="text-gray-200 space-y-1">
+                  <p>College Eligibility Results for <strong className="text-white">{formData.fullName}</strong></p>
+                  <div className="text-sm glass rounded-lg p-3 inline-block mt-2">
+                    <p><strong>Aggregate:</strong> {formData.aggregate}% | <strong>Category:</strong> {formData.category}</p>
+                    <p><strong>Branches:</strong> {formData.preferredBranches.length} | <strong>Colleges:</strong> {formData.selectedColleges.length || 'All'}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -378,25 +379,27 @@ const Index = () => {
 
   if (isLoadingOptions) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center glass-card rounded-2xl p-8 border-0">
           <LoadingSpinner />
-          <p className="mt-4 text-gray-600">Loading form options...</p>
+          <p className="mt-4 text-white">Loading form options...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <div className="flex-1 p-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-2">
-              <GraduationCap className="h-10 w-10 text-blue-600" />
-              DSE College Finder 2024
-            </h1>
-            <p className="text-gray-600">Find eligible colleges in Maharashtra based on real cutoff data</p>
+            <div className="glass-card rounded-2xl p-6 border-0">
+              <h1 className="text-4xl font-bold text-white mb-2 flex items-center justify-center gap-2">
+                <GraduationCap className="h-10 w-10 text-blue-300" />
+                DSE College Finder 2024
+              </h1>
+              <p className="text-gray-200">Find eligible colleges in Maharashtra based on real cutoff data</p>
+            </div>
           </div>
 
           {!isGuest && currentStep === 1 && (
