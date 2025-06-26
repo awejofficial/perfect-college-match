@@ -14,6 +14,7 @@ export interface BranchId {
   created_at: string;
 }
 
+// Fetch colleges (now automatically populated from cutoffs table)
 export const fetchColleges = async (): Promise<CollegeId[]> => {
   try {
     const { data, error } = await supabase
@@ -33,6 +34,7 @@ export const fetchColleges = async (): Promise<CollegeId[]> => {
   }
 };
 
+// Fetch branches (now automatically populated from cutoffs table)
 export const fetchBranches = async (collegeId?: string): Promise<BranchId[]> => {
   try {
     let query = supabase
@@ -58,6 +60,7 @@ export const fetchBranches = async (collegeId?: string): Promise<BranchId[]> => 
   }
 };
 
+// Create college - will be automatically synced when cutoffs are added
 export const createCollege = async (collegeName: string): Promise<CollegeId | null> => {
   try {
     const { data, error } = await supabase
@@ -78,6 +81,7 @@ export const createCollege = async (collegeName: string): Promise<CollegeId | nu
   }
 };
 
+// Update college name
 export const updateCollege = async (collegeId: string, collegeName: string): Promise<boolean> => {
   try {
     const { error } = await supabase
@@ -97,6 +101,7 @@ export const updateCollege = async (collegeId: string, collegeName: string): Pro
   }
 };
 
+// Delete college - Note: This will also affect related cutoffs data integrity
 export const deleteCollege = async (collegeId: string): Promise<boolean> => {
   try {
     const { error } = await supabase
@@ -116,6 +121,7 @@ export const deleteCollege = async (collegeId: string): Promise<boolean> => {
   }
 };
 
+// Create branch - will be automatically synced when cutoffs are added
 export const createBranch = async (collegeId: string, branchName: string): Promise<BranchId | null> => {
   try {
     const { data, error } = await supabase
@@ -136,6 +142,7 @@ export const createBranch = async (collegeId: string, branchName: string): Promi
   }
 };
 
+// Update branch name
 export const updateBranch = async (branchId: string, branchName: string): Promise<boolean> => {
   try {
     const { error } = await supabase
@@ -155,6 +162,7 @@ export const updateBranch = async (branchId: string, branchName: string): Promis
   }
 };
 
+// Delete branch - Note: This will also affect related cutoffs data integrity
 export const deleteBranch = async (branchId: string): Promise<boolean> => {
   try {
     const { error } = await supabase
@@ -170,6 +178,35 @@ export const deleteBranch = async (branchId: string): Promise<boolean> => {
     return true;
   } catch (error) {
     console.error('Failed to delete branch:', error);
+    return false;
+  }
+};
+
+// New function to sync a manual cutoff record (triggers auto-sync)
+export const syncCutoffRecord = async (cutoffData: {
+  college_name: string;
+  branch_name: string;
+  category: string;
+  college_type: string;
+  cap1_cutoff?: number;
+  cap2_cutoff?: number;
+  cap3_cutoff?: number;
+  city?: string;
+  year?: number;
+}): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('cutoffs')
+      .insert([cutoffData]);
+
+    if (error) {
+      console.error('Error syncing cutoff record:', error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Failed to sync cutoff record:', error);
     return false;
   }
 };

@@ -127,6 +127,7 @@ export const fetchPaginatedCutoffs = async (
   }
 };
 
+// Updated to use the new database function
 export const fetchAvailableCategories = async (): Promise<string[]> => {
   try {
     const { data, error } = await supabase.rpc('get_available_categories');
@@ -143,6 +144,7 @@ export const fetchAvailableCategories = async (): Promise<string[]> => {
   }
 };
 
+// Updated to fetch from branch_ids table (now automatically populated)
 export const fetchAvailableBranches = async (): Promise<string[]> => {
   try {
     const { data, error } = await supabase
@@ -183,6 +185,7 @@ export const fetchAvailableCollegeTypes = async (): Promise<string[]> => {
   }
 };
 
+// Updated to use the new database function for hierarchical structure
 export const fetchCollegesWithBranches = async (): Promise<CollegeWithBranches[]> => {
   try {
     const { data, error } = await supabase.rpc('get_colleges_with_branches');
@@ -204,6 +207,46 @@ export const fetchCollegesWithBranches = async (): Promise<CollegeWithBranches[]
   } catch (error) {
     console.error('Failed to fetch colleges with branches:', error);
     return [];
+  }
+};
+
+// New function to add cutoff data (will automatically sync college_ids and branch_ids)
+export const addCutoffRecord = async (cutoffData: Omit<CutoffRecord, 'id'>): Promise<CutoffRecord | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('cutoffs')
+      .insert([cutoffData])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding cutoff record:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Failed to add cutoff record:', error);
+    return null;
+  }
+};
+
+// New function to get college type for a specific college
+export const getCollegeType = async (collegeName: string): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.rpc('get_college_type', {
+      college_name_param: collegeName
+    });
+
+    if (error) {
+      console.error('Error fetching college type:', error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch college type:', error);
+    return null;
   }
 };
 
