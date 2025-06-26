@@ -9,9 +9,9 @@ import {
   WelcomeStep,
   PersonalInfoStep,
   AcademicDetailsStep,
-  PreferencesStep,
   FormStepper
 } from "@/components/form-steps";
+import { EnhancedPreferencesStep } from "@/components/form-steps/EnhancedPreferencesStep";
 import { 
   fetchCutoffData, 
   fetchAvailableCollegeTypes, 
@@ -37,6 +37,14 @@ interface CollegeMatch {
   eligible: boolean;
 }
 
+interface CollegeSelection {
+  collegeName: string;
+  collegeType: string;
+  selectedBranches: string[];
+  availableBranches: string[];
+  expanded: boolean;
+}
+
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -52,7 +60,9 @@ const Index = () => {
     aggregate: '',
     category: '',
     preferredBranches: [] as string[],
-    collegeTypes: [] as string[]
+    collegeTypes: [] as string[],
+    selectedColleges: [] as string[],
+    collegeSelections: [] as CollegeSelection[]
   });
 
   const collegeTypeOptions: CollegeType[] = [
@@ -140,10 +150,13 @@ const Index = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.fullName || !formData.aggregate || !formData.category || formData.preferredBranches.length === 0) {
+    // Get all selected branches from college selections
+    const allSelectedBranches = formData.collegeSelections.flatMap(selection => selection.selectedBranches);
+    
+    if (!formData.fullName || !formData.aggregate || !formData.category || allSelectedBranches.length === 0) {
       toast({
         title: "Incomplete Form",
-        description: "Please fill in all required fields and select at least one branch.",
+        description: "Please fill in all required fields, select colleges, and select at least one branch.",
         variant: "destructive"
       });
       return;
@@ -165,7 +178,7 @@ const Index = () => {
       // Fetch data for all selected branches
       const allCutoffData: CutoffRecord[] = [];
       
-      for (const branch of formData.preferredBranches) {
+      for (const branch of allSelectedBranches) {
         const branchData = await fetchCutoffData(
           formData.category,
           branch,
@@ -337,13 +350,17 @@ const Index = () => {
               )}
 
               {currentStep === 3 && (
-                <PreferencesStep
+                <EnhancedPreferencesStep
                   preferredBranches={formData.preferredBranches}
                   collegeTypes={formData.collegeTypes}
-                  availableBranches={availableBranches}
-                  collegeTypeOptions={collegeTypeOptions}
+                  selectedColleges={formData.selectedColleges}
+                  collegeSelections={formData.collegeSelections}
+                  category={formData.category}
                   onBranchChange={handleBranchChange}
                   onCollegeTypeChange={handleCollegeTypeChange}
+                  onCollegeSelectionChange={(colleges) => setFormData({ ...formData, selectedColleges: colleges })}
+                  onCollegeSelectionsChange={(selections) => setFormData({ ...formData, collegeSelections: selections })}
+                  onCategoryChange={(category) => setFormData({ ...formData, category })}
                 />
               )}
 

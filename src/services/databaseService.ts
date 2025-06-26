@@ -24,6 +24,16 @@ export interface CollegeWithBranches {
   }>;
 }
 
+export interface CollegeTypeInfo {
+  college_name: string;
+  college_type: string;
+}
+
+export interface CollegeBranchInfo {
+  college_name: string;
+  branch_name: string;
+}
+
 // Add UploadRecord interface for compatibility
 export interface UploadRecord {
   id: string;
@@ -185,10 +195,65 @@ export const fetchAvailableCollegeTypes = async (): Promise<string[]> => {
   }
 };
 
+// New function to get all college names
+export const fetchAllCollegeNames = async (): Promise<string[]> => {
+  try {
+    const { data, error } = await supabase.rpc('get_all_college_names');
+
+    if (error) {
+      console.error('Database error:', error);
+      return [];
+    }
+
+    return data?.map((item: { college_name: string }) => item.college_name) || [];
+  } catch (error) {
+    console.error('Failed to fetch college names:', error);
+    return [];
+  }
+};
+
+// New function to get college types for selected colleges
+export const fetchCollegeTypesForColleges = async (collegeNames: string[]): Promise<CollegeTypeInfo[]> => {
+  try {
+    const { data, error } = await supabase.rpc('get_college_types_for_colleges', {
+      college_names: collegeNames
+    });
+
+    if (error) {
+      console.error('Database error:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch college types:', error);
+    return [];
+  }
+};
+
+// New function to get branches for selected colleges
+export const fetchBranchesForColleges = async (collegeNames: string[]): Promise<CollegeBranchInfo[]> => {
+  try {
+    const { data, error } = await supabase.rpc('get_branches_for_colleges', {
+      college_names: collegeNames
+    });
+
+    if (error) {
+      console.error('Database error:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch branches for colleges:', error);
+    return [];
+  }
+};
+
 // Updated to use the new database function for hierarchical structure
 export const fetchCollegesWithBranches = async (): Promise<CollegeWithBranches[]> => {
   try {
-    const { data, error } = await supabase.rpc('get_colleges_with_branches');
+    const { data, error } = await supabase.rpc('get_colleges_with_branches_and_types');
 
     if (error) {
       console.error('Database error:', error);
