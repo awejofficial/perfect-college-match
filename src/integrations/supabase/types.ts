@@ -193,6 +193,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_available_categories: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string
+        }[]
+      }
+      get_college_type: {
+        Args: { college_name_param: string }
+        Returns: string
+      }
+      get_colleges_with_branches: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          college_id: string
+          college_name: string
+          college_type: string
+          branches: Json
+        }[]
+      }
       is_admin: {
         Args: { user_id: string }
         Returns: boolean

@@ -23,6 +23,16 @@ export interface UploadRecord {
   uploaded_by?: string;
 }
 
+export interface CollegeWithBranches {
+  college_id: string;
+  college_name: string;
+  college_type: string;
+  branches: Array<{
+    branch_id: string;
+    branch_name: string;
+  }>;
+}
+
 export const fetchCutoffData = async (
   category?: string,
   branch?: string,
@@ -141,12 +151,28 @@ export const fetchPaginatedCutoffs = async (
   }
 };
 
+export const fetchAvailableCategories = async (): Promise<string[]> => {
+  try {
+    const { data, error } = await supabase.rpc('get_available_categories');
+
+    if (error) {
+      console.error('Database error:', error);
+      return [];
+    }
+
+    return data?.map((item: { category: string }) => item.category) || [];
+  } catch (error) {
+    console.error('Failed to fetch categories:', error);
+    return [];
+  }
+};
+
 export const fetchAvailableBranches = async (): Promise<string[]> => {
   try {
     const { data, error } = await supabase
-      .from('cutoffs')
+      .from('branch_ids')
       .select('branch_name')
-      .not('branch_name', 'is', null);
+      .order('branch_name', { ascending: true });
 
     if (error) {
       console.error('Database error:', error);
@@ -154,7 +180,7 @@ export const fetchAvailableBranches = async (): Promise<string[]> => {
     }
 
     const branches = [...new Set(data?.map(item => item.branch_name) || [])];
-    return branches.sort();
+    return branches;
   } catch (error) {
     console.error('Failed to fetch branches:', error);
     return [];
@@ -177,6 +203,22 @@ export const fetchAvailableCollegeTypes = async (): Promise<string[]> => {
     return types.sort();
   } catch (error) {
     console.error('Failed to fetch college types:', error);
+    return [];
+  }
+};
+
+export const fetchCollegesWithBranches = async (): Promise<CollegeWithBranches[]> => {
+  try {
+    const { data, error } = await supabase.rpc('get_colleges_with_branches');
+
+    if (error) {
+      console.error('Database error:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch colleges with branches:', error);
     return [];
   }
 };

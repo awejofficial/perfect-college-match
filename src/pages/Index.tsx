@@ -9,12 +9,13 @@ import { ChevronRight, ChevronLeft, GraduationCap, User, Users } from "lucide-re
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { CollegeResultsTable } from "@/components/CollegeResultsTable";
 import { Footer } from "@/components/Footer";
-import { fetchCutoffData, fetchAvailableCollegeTypes, type CutoffRecord } from "@/services/databaseService";
-
-interface Category {
-  value: string;
-  label: string;
-}
+import { 
+  fetchCutoffData, 
+  fetchAvailableCollegeTypes, 
+  fetchAvailableCategories,
+  fetchAvailableBranches,
+  type CutoffRecord 
+} from "@/services/databaseService";
 
 interface CollegeType {
   value: string;
@@ -38,8 +39,11 @@ const Index = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<CollegeMatch[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [availableBranches, setAvailableBranches] = useState<string[]>([]);
   const [availableCollegeTypes, setAvailableCollegeTypes] = useState<string[]>([]);
   const [isGuest, setIsGuest] = useState(false);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(true);
   const [formData, setFormData] = useState({
     fullName: '',
     aggregate: '',
@@ -47,31 +51,6 @@ const Index = () => {
     preferredBranches: [] as string[],
     collegeTypes: [] as string[]
   });
-
-  const categories: Category[] = [
-    { value: 'GOPEN', label: 'GOPEN' },
-    { value: 'GSC', label: 'GSC' },
-    { value: 'GSEBC', label: 'GSEBC' },
-    { value: 'LOPEN', label: 'LOPEN' },
-    { value: 'LST', label: 'LST' },
-    { value: 'LOBC', label: 'LOBC' },
-    { value: 'EWS', label: 'EWS' },
-    { value: 'GST', label: 'GST' },
-    { value: 'GOBC', label: 'GOBC' },
-    { value: 'LSEBC', label: 'LSEBC' },
-    { value: 'GNTA', label: 'GNTA' },
-    { value: 'LSC', label: 'LSC' },
-  ];
-
-  const branches = [
-    'Civil Engineering',
-    'Computer Science and Engineering',
-    'Information Technology',
-    'Electrical Engineering',
-    'Electronics and Telecommunication Engg',
-    'Instrumentation Engineering',
-    'Mechanical Engineering'
-  ];
 
   const collegeTypeOptions: CollegeType[] = [
     { value: 'Government', label: 'Government' },
@@ -84,8 +63,29 @@ const Index = () => {
   }, []);
 
   const loadAvailableOptions = async () => {
-    const collegeTypes = await fetchAvailableCollegeTypes();
-    setAvailableCollegeTypes(collegeTypes);
+    setIsLoadingOptions(true);
+    try {
+      const [categories, branches, collegeTypes] = await Promise.all([
+        fetchAvailableCategories(),
+        fetchAvailableBranches(),
+        fetchAvailableCollegeTypes()
+      ]);
+      
+      console.log('Loaded options:', { categories, branches, collegeTypes });
+      
+      setAvailableCategories(categories);
+      setAvailableBranches(branches);
+      setAvailableCollegeTypes(collegeTypes);
+    } catch (error) {
+      console.error('Failed to load options:', error);
+      toast({
+        title: "Loading Error",
+        description: "Failed to load form options. Please refresh the page.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoadingOptions(false);
+    }
   };
 
   const processCollegeMatches = (cutoffData: CutoffRecord[], studentAggregate: number): CollegeMatch[] => {
@@ -280,6 +280,17 @@ const Index = () => {
     );
   }
 
+  if (isLoadingOptions) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <LoadingSpinner />
+          <p className="mt-4 text-gray-600">Loading form options...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
       <div className="flex-1 p-4">
@@ -376,10 +387,13 @@ const Index = () => {
                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                       >
                         <option value="" disabled>Select your category</option>
-                        {categories.map((category) => (
-                          <option key={category.value} value={category.value}>{category.label}</option>
+                        {availableCategories.map((category) => (
+                          <option key={category} value={category}>{category}</option>
                         ))}
                       </select>
+                      {availableCategories.length === 0 && (
+                        <p className="text-sm text-yellow-600">No categories available. Please contact admin to upload cutoff data.</p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -389,7 +403,7 @@ const Index = () => {
                     <div className="grid gap-2">
                       <Label>Preferred Branches (Select multiple)</Label>
                       <div className="grid grid-cols-1 gap-3 max-h-40 overflow-y-auto">
-                        {branches.map((branch) => (
+                        {availableBranches.map((branch) => (
                           <div key={branch} className="flex items-center space-x-2">
                             <input
                               type="checkbox"
@@ -406,6 +420,9 @@ const Index = () => {
                       </div>
                       {formData.preferredBranches.length === 0 && (
                         <p className="text-sm text-red-500">Please select at least one branch</p>
+                      )}
+                      {availableBranches.length === 0 && (
+                        <p className="text-sm text-yellow-600">No branches available. Please contact admin to upload cutoff data.</p>
                       )}
                     </div>
                     
