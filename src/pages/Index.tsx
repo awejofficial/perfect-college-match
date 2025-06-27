@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { GraduationCap, Sparkles, TrendingUp, Users, Award, MapPin } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -353,17 +352,17 @@ const Index = () => {
 
   if (showResults) {
     return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-emerald-50 via-cyan-50 to-blue-50">
         <div className="flex-1 p-4">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-8 animate-fade-in-up">
-              <Card className="mb-6 bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-0">
+              <Card className="mb-6 bg-gradient-to-r from-emerald-600 to-cyan-600 text-white border-0 shadow-2xl">
                 <CardHeader>
                   <CardTitle className="text-4xl mb-2 flex items-center justify-center gap-3">
                     <GraduationCap className="h-10 w-10" />
                     DSE College Finder 2024
                   </CardTitle>
-                  <CardDescription className="text-violet-100 text-lg">
+                  <CardDescription className="text-emerald-100 text-lg">
                     College Eligibility Results for <strong className="text-white">{formData.fullName}</strong>
                   </CardDescription>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mt-4 inline-block">
@@ -390,8 +389,8 @@ const Index = () => {
 
   if (isLoadingOptions) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-        <Card className="text-center animate-scale-in">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-cyan-50 to-blue-50">
+        <Card className="text-center animate-scale-in shadow-2xl">
           <CardHeader>
             <LoadingSpinner />
             <CardTitle className="mt-4 text-slate-800">Loading Application...</CardTitle>
@@ -404,10 +403,10 @@ const Index = () => {
 
   if (!showForm) {
     return (
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-emerald-50 via-cyan-50 to-blue-50">
         <div className="flex-1">
           {/* Modern Hero Section */}
-          <section className="relative bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 text-white py-20 lg:py-32">
+          <section className="relative bg-gradient-to-r from-emerald-600 via-cyan-600 to-blue-600 text-white py-20 lg:py-32">
             <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.1\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"4\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div>
             <div className="container mx-auto px-4 relative">
               <div className="max-w-4xl mx-auto text-center animate-fade-in-up">
@@ -419,14 +418,14 @@ const Index = () => {
                   Find Your Perfect
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300"> College</span>
                 </h1>
-                <p className="text-xl lg:text-2xl mb-8 text-indigo-100 leading-relaxed max-w-3xl mx-auto">
+                <p className="text-xl lg:text-2xl mb-8 text-cyan-100 leading-relaxed max-w-3xl mx-auto">
                   Discover colleges that match your marks with our advanced cutoff analysis system. 
                   Make informed decisions for your academic future.
                 </p>
                 <Button 
                   onClick={handleStartJourney}
                   size="lg"
-                  className="bg-white text-violet-600 hover:bg-gray-100 shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 px-12 py-6 text-lg font-bold rounded-2xl"
+                  className="bg-white text-emerald-600 hover:bg-gray-100 shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 px-12 py-6 text-lg font-bold rounded-2xl"
                 >
                   Start Your Journey
                   <TrendingUp className="ml-2 h-6 w-6" />
@@ -448,9 +447,9 @@ const Index = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                <Card className="animate-slide-in-left">
+                <Card className="animate-slide-in-left hover:shadow-2xl transition-all duration-300">
                   <CardHeader>
-                    <div className="w-16 h-16 bg-gradient-to-r from-violet-500 to-purple-500 rounded-2xl flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-4">
                       <TrendingUp className="h-8 w-8 text-white" />
                     </div>
                     <CardTitle>Real-time Cutoff Data</CardTitle>
@@ -460,9 +459,9 @@ const Index = () => {
                   </CardHeader>
                 </Card>
 
-                <Card className="animate-scale-in animation-delay-200">
+                <Card className="animate-scale-in animation-delay-200 hover:shadow-2xl transition-all duration-300">
                   <CardHeader>
-                    <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center mb-4">
                       <Users className="h-8 w-8 text-white" />
                     </div>
                     <CardTitle>Personalized Matching</CardTitle>
@@ -472,9 +471,9 @@ const Index = () => {
                   </CardHeader>
                 </Card>
 
-                <Card className="animate-slide-in-right">
+                <Card className="animate-slide-in-right hover:shadow-2xl transition-all duration-300">
                   <CardHeader>
-                    <div className="w-16 h-16 bg-gradient-to-r from-rose-500 to-pink-500 rounded-2xl flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-4">
                       <Award className="h-8 w-8 text-white" />
                     </div>
                     <CardTitle>Comprehensive Analysis</CardTitle>
@@ -492,15 +491,15 @@ const Index = () => {
             <div className="container mx-auto px-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                 <div className="animate-fade-in-up">
-                  <div className="text-4xl font-bold text-violet-400 mb-2">10,000+</div>
+                  <div className="text-4xl font-bold text-emerald-400 mb-2">10,000+</div>
                   <div className="text-slate-300">Students Helped</div>
                 </div>
                 <div className="animate-fade-in-up animation-delay-200">
-                  <div className="text-4xl font-bold text-violet-400 mb-2">500+</div>
+                  <div className="text-4xl font-bold text-emerald-400 mb-2">500+</div>
                   <div className="text-slate-300">Colleges Listed</div>
                 </div>
                 <div className="animate-fade-in-up animation-delay-400">
-                  <div className="text-4xl font-bold text-violet-400 mb-2">95%</div>
+                  <div className="text-4xl font-bold text-emerald-400 mb-2">95%</div>
                   <div className="text-slate-300">Accuracy Rate</div>
                 </div>
               </div>
@@ -513,17 +512,17 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-emerald-50 via-cyan-50 to-blue-50">
       <div className="flex-1 p-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8 animate-fade-in-up">
-            <Card className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-0">
+            <Card className="bg-gradient-to-r from-emerald-600 to-cyan-600 text-white border-0 shadow-2xl">
               <CardHeader>
                 <CardTitle className="text-4xl mb-2 flex items-center justify-center gap-3">
                   <GraduationCap className="h-10 w-10" />
                   DSE College Finder 2024
                 </CardTitle>
-                <CardDescription className="text-violet-100 text-lg">
+                <CardDescription className="text-emerald-100 text-lg">
                   Find eligible colleges based on real cutoff data
                 </CardDescription>
               </CardHeader>
