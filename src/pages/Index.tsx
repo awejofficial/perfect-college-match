@@ -10,9 +10,9 @@ import {
   WelcomeStep,
   PersonalInfoStep,
   AcademicDetailsStep,
+  PreferencesStep,
   FormStepper
 } from "@/components/form-steps";
-import { MinimalPreferencesStep } from "@/components/form-steps/MinimalPreferencesStep";
 import { 
   fetchCutoffData, 
   fetchAvailableCollegeTypes, 
@@ -447,17 +447,13 @@ const Index = () => {
               )}
 
               {currentStep === 3 && (
-                <MinimalPreferencesStep
+                <PreferencesStep
                   preferredBranches={formData.preferredBranches}
                   collegeTypes={formData.collegeTypes}
-                  selectedColleges={formData.selectedColleges}
-                  collegeSelections={formData.collegeSelections}
-                  category={formData.category}
+                  availableBranches={availableBranches}
+                  collegeTypeOptions={collegeTypeOptions}
                   onBranchChange={handleBranchChange}
                   onCollegeTypeChange={handleCollegeTypeChange}
-                  onCollegeSelectionChange={(colleges) => setFormData({ ...formData, selectedColleges: colleges })}
-                  onCollegeSelectionsChange={(selections) => setFormData({ ...formData, collegeSelections: selections })}
-                  onCategoryChange={(category) => setFormData({ ...formData, category })}
                 />
               )}
 
