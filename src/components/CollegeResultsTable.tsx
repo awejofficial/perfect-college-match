@@ -1,17 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Download, Check, X } from "lucide-react";
+import { RefreshCw, Download, Check, X, Filter, SortAsc } from "lucide-react";
 import { PaginationControls } from "@/components/PaginationControls";
 
 export interface CollegeMatch {
@@ -38,23 +29,58 @@ export const CollegeResultsTable: React.FC<CollegeResultsTableProps> = ({
   onRefillForm 
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const resultsPerPage = 20;
+  const [sortBy, setSortBy] = useState<'name' | 'cutoff' | 'eligible'>('eligible');
+  const [filterType, setFilterType] = useState<'all' | 'eligible' | 'government' | 'private'>('all');
+  const resultsPerPage = 12;
 
   // Reset to first page when results change
   useEffect(() => {
     setCurrentPage(1);
   }, [results]);
 
-  const totalPages = Math.ceil(results.length / resultsPerPage);
+  // Filter and sort results
+  const filteredResults = results
+    .filter(college => {
+      switch (filterType) {
+        case 'eligible':
+          return college.eligible;
+        case 'government':
+          return college.collegeType?.toLowerCase().includes('government');
+        case 'private':
+          return college.collegeType?.toLowerCase().includes('private');
+        default:
+          return true;
+      }
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.collegeName.localeCompare(b.collegeName);
+        case 'cutoff':
+          const getCutoff = (college: CollegeMatch) => {
+            const cutoffs = [college.cap1Cutoff, college.cap2Cutoff, college.cap3Cutoff]
+              .filter(c => c !== null) as number[];
+            return cutoffs.length > 0 ? Math.min(...cutoffs) : 100;
+          };
+          return getCutoff(a) - getCutoff(b);
+        case 'eligible':
+        default:
+          if (a.eligible && !b.eligible) return -1;
+          if (!a.eligible && b.eligible) return 1;
+          return 0;
+      }
+    });
+
+  const totalPages = Math.ceil(filteredResults.length / resultsPerPage);
   const startIndex = (currentPage - 1) * resultsPerPage;
   const endIndex = startIndex + resultsPerPage;
-  const currentResults = results.slice(startIndex, endIndex);
+  const currentResults = filteredResults.slice(startIndex, endIndex);
 
   const exportToCSV = () => {
-    const headers = ['College Name', 'City', 'Branch', 'Category', 'College Type', 'CAP1 Cutoff (%)', 'CAP2 Cutoff (%)', 'CAP3 Cutoff (%)', 'Eligible'];
+    const headers = ['College Name', 'City', 'Branch', 'Category', 'Type', 'CAP1', 'CAP2', 'CAP3', 'Eligible'];
     const csvContent = [
       headers.join(','),
-      ...results.map(college => [
+      ...filteredResults.map(college => [
         `"${college.collegeName}"`,
         college.city,
         `"${college.branch}"`,
@@ -72,7 +98,7 @@ export const CollegeResultsTable: React.FC<CollegeResultsTableProps> = ({
     const a = document.createElement('a');
     a.setAttribute('hidden', '');
     a.setAttribute('href', url);
-    a.setAttribute('download', `${studentName}-dse-colleges-2024.csv`);
+    a.setAttribute('download', `${studentName}-colleges-2024.csv`);
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -80,135 +106,201 @@ export const CollegeResultsTable: React.FC<CollegeResultsTableProps> = ({
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // Scroll to top of results
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const eligibleCount = results.filter(college => college.eligible).length;
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">DSE College Options (2024)</h2>
-          <p className="text-gray-600">
-            {results.length > 0 
-              ? `Found ${results.length} colleges (${eligibleCount} eligible)`
-              : "No colleges found matching your criteria"
-            }
-          </p>
-        </div>
-        <div className="space-x-2">
-          <Button variant="outline" onClick={onRefillForm}>
-            <RefreshCw className="w-4 h-4 mr-2" />
-            New Search
-          </Button>
-          {results.length > 0 && (
-            <Button onClick={exportToCSV}>
-              <Download className="w-4 h-4 mr-2" />
-              Export CSV
+    <div className="container-nvidia py-8 animate-fade-in">
+      {/* Header Section */}
+      <div className="card-professional mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              College Results for {studentName}
+            </h1>
+            <p className="text-muted-foreground">
+              {filteredResults.length > 0 
+                ? `Showing ${filteredResults.length} colleges (${eligibleCount} eligible)`
+                : "No colleges found matching your criteria"
+              }
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={onRefillForm} className="btn-secondary">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              New Search
             </Button>
-          )}
+            {results.length > 0 && (
+              <Button onClick={exportToCSV} className="btn-nvidia">
+                <Download className="w-4 h-4 mr-2" />
+                Export Results
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
+      {/* Filters and Sort */}
       {results.length > 0 && (
-        <>
-          <div className="rounded-md border">
-            <Table>
-              <TableCaption>
-                DSE college eligibility for {studentName} based on real cutoff data from database
-              </TableCaption>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[300px]">College Name</TableHead>
-                  <TableHead>City</TableHead>
-                  <TableHead>Branch</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-center">CAP1 Cutoff</TableHead>
-                  <TableHead className="text-center">CAP2 Cutoff</TableHead>
-                  <TableHead className="text-center">CAP3 Cutoff</TableHead>
-                  <TableHead className="text-center">Eligible</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentResults.map((college, index) => (
-                  <TableRow key={`${college.collegeName}-${college.branch}-${college.category}-${index}`} className={college.eligible ? 'bg-green-50' : 'bg-red-50'}>
-                    <TableCell className="font-medium">{college.collegeName}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{college.city}</Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">{college.branch}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{college.category}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {college.collegeType || 'N/A'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center font-mono">
-                      {college.cap1Cutoff ? `${college.cap1Cutoff}%` : 'N/A'}
-                    </TableCell>
-                    <TableCell className="text-center font-mono">
-                      {college.cap2Cutoff ? `${college.cap2Cutoff}%` : 'N/A'}
-                    </TableCell>
-                    <TableCell className="text-center font-mono">
-                      {college.cap3Cutoff ? `${college.cap3Cutoff}%` : 'N/A'}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {college.eligible ? (
-                        <div className="flex items-center justify-center">
-                          <Check className="w-5 h-5 text-green-600" />
-                          <span className="ml-1 text-green-600 font-medium">Eligible</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center">
-                          <X className="w-5 h-5 text-red-600" />
-                          <span className="ml-1 text-red-600 font-medium">Not Eligible</span>
-                        </div>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          <PaginationControls
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            totalResults={results.length}
-            resultsPerPage={resultsPerPage}
-          />
-        </>
-      )}
-
-      {results.length === 0 && (
-        <div className="text-center py-12">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <h3 className="font-semibold text-yellow-800 mb-2">No Colleges Found</h3>
-            <p className="text-yellow-700 mb-4">
-              No colleges match your criteria in our database. This could be because:
-            </p>
-            <ul className="text-yellow-700 text-sm list-disc text-left max-w-md mx-auto space-y-1">
-              <li>No cutoff data has been uploaded for your selected branch and category</li>
-              <li>Try selecting different college types or branches</li>
-              <li>Contact the admin to upload relevant cutoff data</li>
-            </ul>
+        <div className="card-professional mb-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Filter:</span>
+              <select 
+                value={filterType} 
+                onChange={(e) => setFilterType(e.target.value as any)}
+                className="input-nvidia text-sm"
+              >
+                <option value="all">All Colleges</option>
+                <option value="eligible">Eligible Only</option>
+                <option value="government">Government</option>
+                <option value="private">Private</option>
+              </select>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <SortAsc className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Sort:</span>
+              <select 
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="input-nvidia text-sm"
+              >
+                <option value="eligible">Eligibility</option>
+                <option value="name">College Name</option>
+                <option value="cutoff">Cutoff</option>
+              </select>
+            </div>
           </div>
         </div>
       )}
 
+      {/* Results Grid */}
+      {currentResults.length > 0 ? (
+        <>
+          <div className="grid-nvidia animate-slide-up">
+            {currentResults.map((college, index) => (
+              <div 
+                key={`${college.collegeName}-${college.branch}-${college.category}-${index}`} 
+                className={`card-professional ${
+                  college.eligible 
+                    ? 'border-nvidia-green/30 bg-nvidia-green/5' 
+                    : 'border-border'
+                } animate-scale-in`}
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                {/* College Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground mb-1 line-clamp-2">
+                      {college.collegeName}
+                    </h3>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline" className="text-xs">
+                        {college.city}
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        {college.collegeType || 'N/A'}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex items-center ml-4">
+                    {college.eligible ? (
+                      <div className="flex items-center text-nvidia-green">
+                        <Check className="w-5 h-5" />
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-destructive">
+                        <X className="w-5 h-5" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Branch and Category */}
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-foreground mb-1">{college.branch}</p>
+                  <Badge variant="outline" className="text-xs">
+                    {college.category}
+                  </Badge>
+                </div>
+
+                {/* Cutoff Information */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  {[
+                    { label: 'CAP1', value: college.cap1Cutoff },
+                    { label: 'CAP2', value: college.cap2Cutoff },
+                    { label: 'CAP3', value: college.cap3Cutoff }
+                  ].map(({ label, value }) => (
+                    <div key={label} className="text-center p-2 bg-muted rounded-lg">
+                      <div className="text-xs text-muted-foreground">{label}</div>
+                      <div className="font-semibold text-foreground">
+                        {value ? `${value}%` : 'N/A'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Status */}
+                <div className="pt-3 border-t border-border">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Status:</span>
+                    <span className={`text-sm font-medium ${
+                      college.eligible ? 'text-nvidia-green' : 'text-destructive'
+                    }`}>
+                      {college.eligible ? 'Eligible' : 'Not Eligible'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-8">
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              totalResults={filteredResults.length}
+              resultsPerPage={resultsPerPage}
+            />
+          </div>
+        </>
+      ) : (
+        <div className="text-center py-12">
+          <div className="card-professional max-w-md mx-auto">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <h3 className="font-semibold text-foreground mb-2">No Results Found</h3>
+            <p className="text-muted-foreground mb-4">
+              No colleges match your current criteria. Try adjusting your filters or search parameters.
+            </p>
+            <Button onClick={onRefillForm} className="btn-nvidia">
+              Start New Search
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Success Message */}
       {eligibleCount > 0 && (
-        <div className="bg-green-100 border border-green-300 rounded-lg p-4">
-          <h3 className="font-semibold text-green-800 mb-2">✅ Eligible Colleges Found!</h3>
-          <p className="text-green-700">
-            You are eligible for {eligibleCount} out of {results.length} colleges. 
-            Focus on the eligible ones and consider them for your DSE application.
-          </p>
+        <div className="card-professional mt-8 border-nvidia-green/30 bg-nvidia-green/5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-nvidia-green/20 rounded-full flex items-center justify-center">
+              <Check className="w-5 h-5 text-nvidia-green" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground mb-1">Great News!</h3>
+              <p className="text-muted-foreground">
+                You're eligible for {eligibleCount} out of {results.length} colleges. 
+                Focus on these options for your applications.
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -4,39 +4,41 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Minimal Design System - Performance Optimized */
+/* Clean NVIDIA-inspired Design System */
 
 @layer base {
   :root {
     /* Light theme colors */
     --background: 255 255 255;
     --foreground: 15 15 15;
-    --card: 249 250 251;
+    --card: 255 255 255;
     --card-foreground: 15 15 15;
     --popover: 255 255 255;
     --popover-foreground: 15 15 15;
     --primary: 118 185 0;
     --primary-foreground: 255 255 255;
-    --secondary: 243 244 246;
+    --secondary: 248 250 252;
     --secondary-foreground: 15 15 15;
-    --muted: 243 244 246;
-    --muted-foreground: 107 114 128;
-    --accent: 243 244 246;
+    --muted: 248 250 252;
+    --muted-foreground: 100 116 139;
+    --accent: 248 250 252;
     --accent-foreground: 15 15 15;
     --destructive: 239 68 68;
     --destructive-foreground: 255 255 255;
-    --border: 229 231 235;
-    --input: 229 231 235;
+    --border: 226 232 240;
+    --input: 226 232 240;
     --ring: 118 185 0;
     --radius: 0.5rem;
     --nvidia-green: 118 185 0;
+    --nvidia-dark: 15 15 15;
+    --nvidia-gray: 71 85 105;
   }
 
   .dark {
-    /* Dark theme - Minimal Nvidia inspired */
+    /* Dark theme - Clean NVIDIA inspired */
     --background: 15 15 15;
     --foreground: 255 255 255;
-    --card: 30 30 30;
+    --card: 24 24 27;
     --card-foreground: 255 255 255;
     --popover: 15 15 15;
     --popover-foreground: 255 255 255;
@@ -54,6 +56,8 @@
     --input: 39 39 42;
     --ring: 118 185 0;
     --nvidia-green: 118 185 0;
+    --nvidia-dark: 15 15 15;
+    --nvidia-gray: 71 85 105;
   }
 }
 
@@ -69,85 +73,89 @@
   body {
     @apply bg-background text-foreground font-[Inter] antialiased;
     min-height: 100vh;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold leading-tight;
+  }
+
+  h1 {
+    @apply text-4xl lg:text-5xl;
+  }
+
+  h2 {
+    @apply text-3xl lg:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl lg:text-3xl;
   }
 }
 
-/* Minimal Glassmorphism - Used sparingly */
+/* Clean Component Styles */
 @layer utilities {
-  .glass-minimal {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Professional card styles */
+  .card-professional {
+    @apply bg-card rounded-xl border border-border p-6 shadow-sm;
     transition: all 0.2s ease;
   }
 
-  .dark .glass-minimal {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .glass-card {
-    @apply glass-minimal rounded-lg;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
-  }
-
-  .glass-card:hover {
-    background: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  }
-
-  .dark .glass-card:hover {
-    background: rgba(255, 255, 255, 0.08);
-  }
-
-  .glass-hero {
-    @apply glass-minimal rounded-2xl;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  }
-
-  /* Minimal button styles */
-  .btn-primary {
-    @apply bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(118, 185, 0, 0.2);
-  }
-
-  .btn-primary:hover {
-    @apply shadow-lg;
-    box-shadow: 0 4px 16px rgba(118, 185, 0, 0.3);
-    transform: translateY(-1px);
-  }
-
-  .btn-secondary {
-    @apply bg-secondary text-secondary-foreground px-6 py-3 rounded-lg font-medium;
-    transition: all 0.2s ease;
-  }
-
-  .btn-secondary:hover {
-    @apply bg-secondary/80;
-  }
-
-  /* Clean card styles */
-  .card-minimal {
-    @apply bg-card rounded-lg border p-6;
-    transition: all 0.2s ease;
-  }
-
-  .card-minimal:hover {
+  .card-professional:hover {
     @apply shadow-md;
     transform: translateY(-2px);
   }
 
-  /* Minimal input styles */
-  .input-minimal {
-    @apply bg-background border border-input rounded-lg px-4 py-3 text-foreground;
+  /* Clean button styles */
+  .btn-nvidia {
+    @apply bg-nvidia-green text-white px-8 py-3 rounded-lg font-medium;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px 0 rgba(118, 185, 0, 0.2);
+  }
+
+  .btn-nvidia:hover {
+    @apply shadow-lg;
+    box-shadow: 0 6px 20px 0 rgba(118, 185, 0, 0.3);
+    transform: translateY(-1px);
+  }
+
+  .btn-nvidia:active {
+    transform: translateY(0);
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground px-8 py-3 rounded-lg font-medium border border-border;
     transition: all 0.2s ease;
   }
 
-  .input-minimal:focus {
-    @apply outline-none ring-2 ring-primary/20 border-primary;
+  .btn-secondary:hover {
+    @apply bg-secondary/80 shadow-sm;
+  }
+
+  /* Hero section with subtle glass effect */
+  .hero-section {
+    @apply relative overflow-hidden;
+    background: linear-gradient(135deg, rgba(118, 185, 0, 0.05) 0%, rgba(15, 15, 15, 0.05) 100%);
+  }
+
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(118, 185, 0, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Grid system */
+  .grid-nvidia {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8;
+  }
+
+  .grid-nvidia-4 {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6;
   }
 
   /* Text utilities */
@@ -159,20 +167,85 @@
     background-color: rgb(var(--nvidia-green));
   }
 
-  /* Responsive utilities */
-  .container-responsive {
+  .text-nvidia-gray {
+    color: rgb(var(--nvidia-gray));
+  }
+
+  /* Responsive container */
+  .container-nvidia {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* Theme transition */
-  .theme-transition {
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  /* Smooth transitions */
+  .transition-nvidia {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Focus styles */
+  .focus-nvidia {
+    @apply focus:outline-none focus:ring-2 focus:ring-nvidia-green focus:ring-offset-2;
+  }
+
+  /* Clean input styles */
+  .input-nvidia {
+    @apply bg-background border border-input rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground;
+    transition: all 0.2s ease;
+  }
+
+  .input-nvidia:focus {
+    @apply outline-none ring-2 ring-nvidia-green/20 border-nvidia-green;
+  }
+
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.4s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 }
 
-/* Minimal scrollbar */
+/* Performance optimized scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -181,9 +254,16 @@
 
 ::-webkit-scrollbar-thumb {
   background: rgba(118, 185, 0, 0.3);
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(118, 185, 0, 0.5);
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
 }
