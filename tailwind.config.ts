@@ -62,10 +62,7 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				},
-				'nvidia-green': 'rgb(var(--nvidia-green))',
-				'nvidia-dark': 'rgb(var(--nvidia-dark))',
-				'nvidia-gray': 'rgb(var(--nvidia-gray))'
+				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -42,7 +42,7 @@ export const FormStepper: React.FC<FormStepperProps> = ({
                 key={step}
                 className={`w-2 h-2 rounded-full transition-all duration-200 ${
                   step === currentStep
-                    ? 'bg-nvidia-green'
+                    ? 'bg-black'
                     : step < currentStep
                     ? 'bg-foreground'
                     : 'bg-muted-foreground'
