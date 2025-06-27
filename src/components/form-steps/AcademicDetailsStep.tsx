@@ -20,17 +20,17 @@ export const AcademicDetailsStep: React.FC<AcademicDetailsStepProps> = ({
   onCategoryChange
 }) => {
   return (
-    <Card>
+    <Card className="bg-white border-gray-200">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl">Academic Details</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl text-black">Academic Details</CardTitle>
+        <CardDescription className="text-gray-600">
           Enter your percentage and category.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="grid gap-2">
-            <Label htmlFor="aggregate">Aggregate Percentage</Label>
+            <Label htmlFor="aggregate" className="text-black">Aggregate Percentage</Label>
             <Input
               id="aggregate"
               type="number"
@@ -38,13 +38,14 @@ export const AcademicDetailsStep: React.FC<AcademicDetailsStepProps> = ({
               placeholder="Enter your percentage (e.g., 82.02)"
               value={aggregate}
               onChange={(e) => onAggregateChange(e.target.value)}
+              className="bg-white border-gray-200 text-black focus:border-black focus:ring-black"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category" className="text-black">Category</Label>
             <select
               id="category"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-black ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus:border-black disabled:cursor-not-allowed disabled:opacity-50"
               value={category}
               onChange={(e) => onCategoryChange(e.target.value)}
             >
@@ -54,7 +55,9 @@ export const AcademicDetailsStep: React.FC<AcademicDetailsStepProps> = ({
               ))}
             </select>
             {availableCategories.length === 0 && (
-              <p className="text-sm text-yellow-600">No categories available. Please contact admin to upload cutoff data.</p>
+              <p className="text-sm text-red-600 bg-white p-2 rounded border border-gray-200">
+                No categories available. Please contact admin to upload cutoff data.
+              </p>
             )}
           </div>
         </div>

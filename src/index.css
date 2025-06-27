@@ -19,7 +19,7 @@
     --primary-foreground: 255 255 255; /* White text on black */
     --secondary: 255 255 255; /* Pure white for subtle backgrounds */
     --secondary-foreground: 0 0 0; /* Pure black */
-    --muted: 255 255 255; /* Pure white for disabled states */
+    --muted: 250 250 250; /* Very light gray instead of yellow */
     --muted-foreground: 64 64 64; /* Dark gray for secondary text */
     --accent: 255 255 255; /* Pure white */
     --accent-foreground: 0 0 0; /* Pure black */
@@ -62,6 +62,40 @@
   h3 {
     @apply text-2xl lg:text-3xl;
   }
+
+  /* Force pure white backgrounds for all form elements */
+  input, textarea, select {
+    @apply bg-white border-gray-200 text-black;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    @apply bg-white border-black ring-black;
+  }
+
+  /* Override browser defaults */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: black !important;
+  }
+
+  /* Force white backgrounds for all elements that might have yellow */
+  .bg-yellow-50,
+  .bg-yellow-100,
+  .bg-yellow-200,
+  .bg-amber-50,
+  .bg-amber-100 {
+    @apply bg-white !important;
+  }
+
+  /* Ensure error messages are red, not yellow */
+  .text-yellow-600,
+  .text-yellow-500,
+  .text-amber-600 {
+    @apply text-red-600 !important;
+  }
 }
 
 /* Minimal Component Styles */
@@ -84,7 +118,7 @@
 
   /* Minimal secondary button */
   .btn-minimal {
-    @apply bg-white border border-gray-200 text-black px-6 py-3 rounded-lg font-medium hover:bg-white;
+    @apply bg-white border border-gray-200 text-black px-6 py-3 rounded-lg font-medium hover:bg-gray-50;
     transition: all 0.2s ease;
   }
 
@@ -95,7 +129,7 @@
   }
 
   .input-minimal:focus {
-    @apply outline-none ring-2 ring-black border-black;
+    @apply outline-none ring-2 ring-black border-black bg-white;
   }
 
   /* Black utilities */
@@ -150,6 +184,22 @@
     @apply bg-white;
   }
 
+  /* Metal card styles for welcome step */
+  .metal-card {
+    @apply bg-white border border-gray-200 rounded-lg p-6;
+    transition: all 0.2s ease;
+  }
+
+  .metal-button {
+    @apply bg-black text-white hover:bg-gray-800;
+    transition: all 0.2s ease;
+  }
+
+  .metal-button-outline {
+    @apply bg-white border border-gray-200 text-black hover:bg-gray-50;
+    transition: all 0.2s ease;
+  }
+
   /* Animation utilities - minimal */
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out;
@@ -195,6 +245,45 @@
       transform: scale(1);
     }
   }
+
+  /* Force override any remaining yellow backgrounds */
+  .bg-yellow-50 {
+    @apply bg-white !important;
+  }
+
+  .bg-yellow-100 {
+    @apply bg-gray-50 !important;
+  }
+
+  .bg-amber-50 {
+    @apply bg-white !important;
+  }
+
+  .bg-blue-50 {
+    @apply bg-white !important;
+  }
+
+  /* Ensure select elements have white backgrounds */
+  select {
+    @apply bg-white border-gray-200 text-black;
+  }
+
+  select:focus {
+    @apply bg-white border-black ring-black;
+  }
+
+  /* Override any remaining yellow text */
+  .text-yellow-600 {
+    @apply text-red-600 !important;
+  }
+
+  .text-yellow-500 {
+    @apply text-red-500 !important;
+  }
+
+  .text-amber-600 {
+    @apply text-red-600 !important;
+  }
 }
 
 /* Minimal scrollbar */
@@ -213,4 +302,26 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
+}
+
+/* Additional overrides for stubborn yellow backgrounds */
+* {
+  --tw-bg-opacity: 1 !important;
+}
+
+.bg-yellow-50,
+.bg-yellow-100,
+.bg-yellow-200,
+.bg-amber-50,
+.bg-amber-100,
+.bg-blue-50 {
+  background-color: rgb(255 255 255) !important;
+}
+
+/* Ensure form validation messages are not yellow */
+.text-yellow-600,
+.text-yellow-500,
+.text-amber-600,
+.text-amber-500 {
+  color: rgb(220 38 38) !important; /* Red color */
 }
