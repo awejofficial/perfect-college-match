@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, Download, Check, X, Filter, SortAsc } from "lucide-react";
+import { RefreshCw, Download, Check, X, Filter, SortAsc, Search } from "lucide-react";
 import { PaginationControls } from "@/components/PaginationControls";
 
 export interface CollegeMatch {
