@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Sparkles, TrendingUp, Users, Award, MapPin } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { MinimalResultsTable } from "@/components/MinimalResultsTable";
 import { Footer } from "@/components/Footer";
-import { HeroSection } from "@/components/HeroSection";
-import { FeatureCards } from "@/components/FeatureCards";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   WelcomeStep,
   PersonalInfoStep,
@@ -352,23 +352,27 @@ const Index = () => {
 
   if (showResults) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="flex-1 p-4">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-8">
-              <div className="minimal-card mb-6">
-                <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
-                  <GraduationCap className="h-8 w-8 text-nvidia-green" />
-                  DSE College Finder 2024
-                </h1>
-                <div className="text-muted-foreground space-y-1">
-                  <p>College Eligibility Results for <strong className="text-foreground">{formData.fullName}</strong></p>
-                  <div className="text-sm bg-muted rounded p-3 inline-block mt-2">
-                    <p><strong>Aggregate:</strong> {formData.aggregate}% | <strong>Category:</strong> {formData.category}</p>
-                    <p><strong>Branches:</strong> {formData.preferredBranches.length} | <strong>Colleges:</strong> {formData.selectedColleges.length || 'All'}</p>
+            <div className="text-center mb-8 animate-fade-in-up">
+              <Card className="mb-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0">
+                <CardHeader>
+                  <CardTitle className="text-4xl mb-2 flex items-center justify-center gap-3">
+                    <GraduationCap className="h-10 w-10" />
+                    DSE College Finder 2024
+                  </CardTitle>
+                  <CardDescription className="text-blue-100 text-lg">
+                    College Eligibility Results for <strong className="text-white">{formData.fullName}</strong>
+                  </CardDescription>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mt-4 inline-block">
+                    <div className="text-sm space-y-2">
+                      <p><strong>Aggregate:</strong> {formData.aggregate}% | <strong>Category:</strong> {formData.category}</p>
+                      <p><strong>Branches:</strong> {formData.preferredBranches.length} | <strong>Colleges:</strong> {formData.selectedColleges.length || 'All'}</p>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </CardHeader>
+              </Card>
             </div>
 
             <MinimalResultsTable 
@@ -385,21 +389,122 @@ const Index = () => {
 
   if (isLoadingOptions) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center minimal-card">
-          <LoadingSpinner />
-          <p className="mt-4 text-foreground">Loading form options...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+        <Card className="text-center animate-scale-in">
+          <CardHeader>
+            <LoadingSpinner />
+            <CardTitle className="mt-4 text-foreground">Loading Application...</CardTitle>
+            <CardDescription>Preparing your college finder experience</CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     );
   }
 
   if (!showForm) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="flex-1">
-          <HeroSection onStartClick={handleStartJourney} />
-          <FeatureCards />
+          {/* Modern Hero Section */}
+          <section className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 text-white py-20 lg:py-32">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+            <div className="container-modern relative">
+              <div className="max-w-4xl mx-auto text-center animate-fade-in-up">
+                <div className="flex items-center justify-center gap-4 mb-6">
+                  <GraduationCap className="h-16 w-16 text-yellow-300" />
+                  <Sparkles className="h-8 w-8 text-yellow-300 animate-pulse" />
+                </div>
+                <h1 className="text-5xl lg:text-7xl font-display font-bold mb-6 leading-tight">
+                  Find Your Perfect
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300"> College</span>
+                </h1>
+                <p className="text-xl lg:text-2xl mb-8 text-blue-100 leading-relaxed max-w-3xl mx-auto">
+                  Discover colleges that match your marks with our advanced cutoff analysis system. 
+                  Make informed decisions for your academic future.
+                </p>
+                <Button 
+                  onClick={handleStartJourney}
+                  size="lg"
+                  className="bg-white text-indigo-600 hover:bg-gray-100 shadow-2xl hover:shadow-3xl transform hover:scale-105 transition-all duration-300 px-12 py-6 text-lg font-bold rounded-2xl"
+                >
+                  Start Your Journey
+                  <TrendingUp className="ml-2 h-6 w-6" />
+                </Button>
+              </div>
+            </div>
+          </section>
+
+          {/* Feature Cards Section */}
+          <section className="py-20 bg-white">
+            <div className="container-modern">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl lg:text-5xl font-display font-bold text-foreground mb-4">
+                  Why Choose Our Platform?
+                </h2>
+                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                  Advanced features designed to help you make the best college choice
+                </p>
+              </div>
+              
+              <div className="grid-modern">
+                <Card className="animate-slide-in-left">
+                  <CardHeader>
+                    <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-4">
+                      <TrendingUp className="h-8 w-8 text-white" />
+                    </div>
+                    <CardTitle>Real-time Cutoff Data</CardTitle>
+                    <CardDescription>
+                      Access the most up-to-date cutoff information from official sources to make accurate predictions.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <Card className="animate-scale-in animation-delay-200">
+                  <CardHeader>
+                    <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-4">
+                      <Users className="h-8 w-8 text-white" />
+                    </div>
+                    <CardTitle>Personalized Matching</CardTitle>
+                    <CardDescription>
+                      Get college recommendations tailored to your specific marks, category, and preferences.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <Card className="animate-slide-in-right">
+                  <CardHeader>
+                    <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-4">
+                      <Award className="h-8 w-8 text-white" />
+                    </div>
+                    <CardTitle>Comprehensive Analysis</CardTitle>
+                    <CardDescription>
+                      Detailed insights into college options including location, type, and admission probability.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
+            </div>
+          </section>
+
+          {/* Stats Section */}
+          <section className="py-16 bg-gradient-to-r from-slate-900 to-slate-800 text-white">
+            <div className="container-modern">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div className="animate-fade-in-up">
+                  <div className="text-4xl font-bold text-gradient-secondary mb-2">10,000+</div>
+                  <div className="text-slate-300">Students Helped</div>
+                </div>
+                <div className="animate-fade-in-up animation-delay-200">
+                  <div className="text-4xl font-bold text-gradient-secondary mb-2">500+</div>
+                  <div className="text-slate-300">Colleges Listed</div>
+                </div>
+                <div className="animate-fade-in-up animation-delay-400">
+                  <div className="text-4xl font-bold text-gradient-secondary mb-2">95%</div>
+                  <div className="text-slate-300">Accuracy Rate</div>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
         <Footer />
       </div>
@@ -407,28 +512,34 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="flex-1 p-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-8">
-            <div className="minimal-card">
-              <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
-                <GraduationCap className="h-8 w-8 text-nvidia-green" />
-                DSE College Finder 2024
-              </h1>
-              <p className="text-muted-foreground">Find eligible colleges based on real cutoff data</p>
-            </div>
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8 animate-fade-in-up">
+            <Card className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0">
+              <CardHeader>
+                <CardTitle className="text-4xl mb-2 flex items-center justify-center gap-3">
+                  <GraduationCap className="h-10 w-10" />
+                  DSE College Finder 2024
+                </CardTitle>
+                <CardDescription className="text-blue-100 text-lg">
+                  Find eligible colleges based on real cutoff data
+                </CardDescription>
+              </CardHeader>
+            </Card>
           </div>
 
           {!isGuest && currentStep === 1 && (
-            <WelcomeStep 
-              onGuestAccess={handleGuestAccess}
-              onEmailLogin={handleEmailLogin}
-            />
+            <div className="animate-scale-in">
+              <WelcomeStep 
+                onGuestAccess={handleGuestAccess}
+                onEmailLogin={handleEmailLogin}
+              />
+            </div>
           )}
 
           {(isGuest || currentStep > 1) && (
-            <>
+            <div className="animate-fade-in-up">
               {(currentStep === 1 && isGuest) && (
                 <PersonalInfoStep
                   fullName={formData.fullName}
@@ -464,7 +575,7 @@ const Index = () => {
                 onPrev={handlePrev}
                 onSubmit={handleSubmit}
               />
-            </>
+            </div>
           )}
         </div>
       </div>
