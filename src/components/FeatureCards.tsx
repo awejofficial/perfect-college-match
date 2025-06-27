@@ -6,38 +6,34 @@ const features = [
   {
     icon: Search,
     title: 'College Explorer',
-    description: 'Discover colleges based on your preferences, location, and academic performance.',
-    color: 'from-blue-500/20 to-cyan-500/20'
+    description: 'Discover colleges based on your preferences, location, and academic performance with comprehensive filters.',
   },
   {
     icon: Target,
     title: 'Cutoff Predictor',
-    description: 'Get accurate cutoff predictions based on historical data and current trends.',
-    color: 'from-green-500/20 to-emerald-500/20'
+    description: 'Get accurate cutoff predictions based on historical data and current admission trends.',
   },
   {
     icon: TrendingUp,
     title: 'Result Analyzer',
-    description: 'Analyze your chances and compare different colleges with detailed insights.',
-    color: 'from-purple-500/20 to-pink-500/20'
+    description: 'Analyze your chances and compare different colleges with detailed insights and statistics.',
   },
   {
     icon: FileText,
     title: 'Smart Reports',
-    description: 'Generate comprehensive reports with personalized recommendations.',
-    color: 'from-orange-500/20 to-red-500/20'
+    description: 'Generate comprehensive reports with personalized recommendations for your college journey.',
   }
 ];
 
 export const FeatureCards: React.FC = () => {
   return (
-    <section className="py-20">
-      <div className="container mx-auto px-4">
+    <section className="py-20 bg-muted/30">
+      <div className="container-responsive">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-4">
             Powerful Features
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Everything you need to make informed decisions about your college admissions
           </p>
         </div>
@@ -48,11 +44,10 @@ export const FeatureCards: React.FC = () => {
             return (
               <div
                 key={feature.title}
-                className="glass-card rounded-2xl p-6 group hover:scale-105 transition-all duration-300"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="glass-card p-6 group"
               >
-                <div className={`glass-card rounded-full w-16 h-16 flex items-center justify-center mb-6 bg-gradient-to-br ${feature.color} group-hover:scale-110 transition-transform duration-300`}>
-                  <Icon className="h-8 w-8 text-nvidia-green" />
+                <div className="flex items-center justify-center w-12 h-12 bg-nvidia-green/10 rounded-lg mb-6 group-hover:bg-nvidia-green/20 transition-colors">
+                  <Icon className="h-6 w-6 text-nvidia-green" />
                 </div>
                 
                 <h3 className="text-xl font-semibold text-foreground mb-3">

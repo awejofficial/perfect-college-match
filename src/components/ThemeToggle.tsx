@@ -12,15 +12,14 @@ export const ThemeToggle: React.FC = () => {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      className="glass-button rounded-full w-10 h-10 relative overflow-hidden group"
+      className="h-10 w-10 rounded-lg hover:bg-accent theme-transition"
       aria-label="Toggle theme"
     >
-      <div className={`transition-all duration-300 ${theme === 'light' ? 'rotate-0 scale-100' : 'rotate-90 scale-0'}`}>
-        <Sun className="h-4 w-4" />
-      </div>
-      <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${theme === 'dark' ? 'rotate-0 scale-100' : '-rotate-90 scale-0'}`}>
-        <Moon className="h-4 w-4" />
-      </div>
+      {theme === 'light' ? (
+        <Moon className="h-5 w-5" />
+      ) : (
+        <Sun className="h-5 w-5" />
+      )}
     </Button>
   );
 };

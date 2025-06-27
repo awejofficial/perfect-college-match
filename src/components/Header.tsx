@@ -5,16 +5,19 @@ import { ThemeToggle } from './ThemeToggle';
 
 export const Header: React.FC = () => {
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 glass-card border-0 border-b border-white/10">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="glass rounded-full p-2 nvidia-glow">
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border theme-transition">
+      <div className="container-responsive">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 bg-nvidia-green/10 rounded-lg">
               <GraduationCap className="h-6 w-6 text-nvidia-green" />
             </div>
-            <h1 className="text-xl font-bold text-foreground">
-              DSE College Finder
-            </h1>
+            <div>
+              <h1 className="text-xl font-semibold text-foreground">
+                DSE College Finder
+              </h1>
+              <p className="text-xs text-muted-foreground">2024 Edition</p>
+            </div>
           </div>
           
           <ThemeToggle />

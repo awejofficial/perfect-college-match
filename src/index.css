@@ -4,60 +4,56 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Nvidia-inspired Design System with Glassmorphism */
+/* Minimal Design System - Performance Optimized */
 
 @layer base {
   :root {
     /* Light theme colors */
-    --background: 210 40% 98%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 142 76% 36%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 142 76% 36%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142 76% 36%;
-    --radius: 0.75rem;
-    --nvidia-green: 118 100% 36%;
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
+    --background: 255 255 255;
+    --foreground: 15 15 15;
+    --card: 249 250 251;
+    --card-foreground: 15 15 15;
+    --popover: 255 255 255;
+    --popover-foreground: 15 15 15;
+    --primary: 118 185 0;
+    --primary-foreground: 255 255 255;
+    --secondary: 243 244 246;
+    --secondary-foreground: 15 15 15;
+    --muted: 243 244 246;
+    --muted-foreground: 107 114 128;
+    --accent: 243 244 246;
+    --accent-foreground: 15 15 15;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --border: 229 231 235;
+    --input: 229 231 235;
+    --ring: 118 185 0;
+    --radius: 0.5rem;
+    --nvidia-green: 118 185 0;
   }
 
   .dark {
-    /* Dark theme - Nvidia inspired */
-    --background: 0 0% 6%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 6%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 118 100% 36%;
-    --primary-foreground: 0 0% 6%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 118 100% 36%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 118 100% 36%;
-    --nvidia-green: 118 100% 36%;
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    /* Dark theme - Minimal Nvidia inspired */
+    --background: 15 15 15;
+    --foreground: 255 255 255;
+    --card: 30 30 30;
+    --card-foreground: 255 255 255;
+    --popover: 15 15 15;
+    --popover-foreground: 255 255 255;
+    --primary: 118 185 0;
+    --primary-foreground: 15 15 15;
+    --secondary: 39 39 42;
+    --secondary-foreground: 255 255 255;
+    --muted: 39 39 42;
+    --muted-foreground: 161 161 170;
+    --accent: 39 39 42;
+    --accent-foreground: 255 255 255;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --border: 39 39 42;
+    --input: 39 39 42;
+    --ring: 118 185 0;
+    --nvidia-green: 118 185 0;
   }
 }
 
@@ -71,205 +67,123 @@
   }
 
   body {
-    @apply bg-background text-foreground font-[Inter] transition-colors duration-300;
-    background: linear-gradient(135deg, 
-      hsl(var(--background)) 0%, 
-      hsl(var(--background)) 40%,
-      hsl(var(--muted)) 100%);
+    @apply bg-background text-foreground font-[Inter] antialiased;
     min-height: 100vh;
-    font-smooth: always;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  .dark body {
-    background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }
 
-/* Advanced Glassmorphism System */
+/* Minimal Glassmorphism - Used sparingly */
 @layer utilities {
-  .glass {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--glass-border);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.12),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    will-change: transform, opacity;
-    transform: translateZ(0);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  .glass-minimal {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+  }
+
+  .dark .glass-minimal {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .glass-card {
-    background: linear-gradient(135deg, 
-      var(--glass-bg) 0%, 
-      rgba(255, 255, 255, 0.02) 100%);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid var(--glass-border);
-    box-shadow: 
-      0 16px 64px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    will-change: transform, opacity, filter;
-    transform: translateZ(0);
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    @apply glass-minimal rounded-lg;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   }
 
   .glass-card:hover {
-    transform: translateY(-4px) translateZ(0);
-    box-shadow: 
-      0 24px 80px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   }
 
-  .glass-button {
-    background: linear-gradient(135deg, 
-      rgba(118, 185, 0, 0.2) 0%, 
-      rgba(118, 185, 0, 0.1) 100%);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid hsl(var(--nvidia-green) / 0.3);
-    color: hsl(var(--nvidia-green));
-    font-weight: 600;
-    box-shadow: 
-      0 8px 24px rgba(118, 185, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    will-change: transform, opacity, filter, box-shadow;
-    transform: translateZ(0);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .glass-button:hover {
-    background: linear-gradient(135deg, 
-      rgba(118, 185, 0, 0.3) 0%, 
-      rgba(118, 185, 0, 0.15) 100%);
-    transform: translateY(-2px) translateZ(0);
-    box-shadow: 
-      0 12px 32px rgba(118, 185, 0, 0.25),
-      0 0 20px rgba(118, 185, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    color: white;
-  }
-
-  .glass-button:active {
-    transform: translateY(0px) translateZ(0);
-    box-shadow: 
-      0 4px 16px rgba(118, 185, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
-
-  .glass-input {
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
-    box-shadow: 
-      inset 0 2px 8px rgba(0, 0, 0, 0.05),
-      0 1px 0 rgba(255, 255, 255, 0.05);
-    will-change: transform, opacity;
-    transform: translateZ(0);
-    transition: all 0.2s ease-out;
-  }
-
-  .glass-input:focus {
-    background: rgba(118, 185, 0, 0.05);
-    border-color: hsl(var(--nvidia-green) / 0.3);
-    box-shadow: 
-      inset 0 2px 8px rgba(0, 0, 0, 0.05),
-      0 0 0 2px rgba(118, 185, 0, 0.1);
+  .dark .glass-card:hover {
+    background: rgba(255, 255, 255, 0.08);
   }
 
   .glass-hero {
-    background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.08) 0%, 
-      rgba(255, 255, 255, 0.02) 50%,
-      rgba(118, 185, 0, 0.05) 100%);
-    backdrop-filter: blur(32px) saturate(200%);
-    -webkit-backdrop-filter: blur(32px) saturate(200%);
-    border: 1px solid var(--glass-border);
-    box-shadow: 
-      0 32px 128px rgba(0, 0, 0, 0.12),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    @apply glass-minimal rounded-2xl;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   }
 
-  .nvidia-glow {
-    box-shadow: 0 0 20px rgba(118, 185, 0, 0.3);
+  /* Minimal button styles */
+  .btn-primary {
+    @apply bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(118, 185, 0, 0.2);
   }
 
-  .nvidia-glow:hover {
-    box-shadow: 0 0 30px rgba(118, 185, 0, 0.5);
+  .btn-primary:hover {
+    @apply shadow-lg;
+    box-shadow: 0 4px 16px rgba(118, 185, 0, 0.3);
+    transform: translateY(-1px);
   }
 
-  /* Parallax and motion effects */
-  .parallax {
-    transform: translateZ(0);
-    will-change: transform;
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground px-6 py-3 rounded-lg font-medium;
+    transition: all 0.2s ease;
+  }
+
+  .btn-secondary:hover {
+    @apply bg-secondary/80;
+  }
+
+  /* Clean card styles */
+  .card-minimal {
+    @apply bg-card rounded-lg border p-6;
+    transition: all 0.2s ease;
+  }
+
+  .card-minimal:hover {
+    @apply shadow-md;
+    transform: translateY(-2px);
+  }
+
+  /* Minimal input styles */
+  .input-minimal {
+    @apply bg-background border border-input rounded-lg px-4 py-3 text-foreground;
+    transition: all 0.2s ease;
+  }
+
+  .input-minimal:focus {
+    @apply outline-none ring-2 ring-primary/20 border-primary;
+  }
+
+  /* Text utilities */
+  .text-nvidia-green {
+    color: rgb(var(--nvidia-green));
+  }
+
+  .bg-nvidia-green {
+    background-color: rgb(var(--nvidia-green));
+  }
+
+  /* Responsive utilities */
+  .container-responsive {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
   /* Theme transition */
-  * {
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-  }
-
-  /* Performance optimizations */
-  .glass, .glass-card, .glass-button, .glass-input, .glass-hero {
-    transform: translateZ(0);
-    will-change: transform;
-    backface-visibility: hidden;
-    perspective: 1000px;
-  }
-
-  /* Scrollbar styling */
-  ::-webkit-scrollbar {
-    width: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 4px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, 
-      rgba(118, 185, 0, 0.6) 0%, 
-      rgba(118, 185, 0, 0.3) 100%);
-    border-radius: 4px;
-    backdrop-filter: blur(4px);
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, 
-      rgba(118, 185, 0, 0.8) 0%, 
-      rgba(118, 185, 0, 0.5) 100%);
+  .theme-transition {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
 }
 
-/* Typography */
-.text-nvidia-green {
-  color: hsl(var(--nvidia-green));
+/* Minimal scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-.bg-nvidia-green {
-  background-color: hsl(var(--nvidia-green));
+::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* Animations */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+::-webkit-scrollbar-thumb {
+  background: rgba(118, 185, 0, 0.3);
+  border-radius: 3px;
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(118, 185, 0, 0.3); }
-  50% { box-shadow: 0 0 40px rgba(118, 185, 0, 0.6), 0 0 60px rgba(118, 185, 0, 0.3); }
-}
-
-.animate-glow-pulse {
-  animation: glow-pulse 3s ease-in-out infinite;
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(118, 185, 0, 0.5);
 }

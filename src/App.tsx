@@ -31,16 +31,15 @@ const App: React.FC = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <div className="min-h-screen flex flex-col">
+            <div className="min-h-screen bg-background theme-transition">
               <Header />
-              <main className="flex-1 pt-16">
+              <main>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/auth" element={<UserAuth />} />
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/admin-auth" element={<AdminAuth />} />
                   <Route path="/admin-panel" element={<AdminPanel />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
