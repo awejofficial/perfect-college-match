@@ -4,60 +4,60 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Clean NVIDIA-inspired Design System */
+/* NVIDIA-Inspired Color Palette Implementation */
 
 @layer base {
   :root {
-    /* Light theme colors */
-    --background: 255 255 255;
-    --foreground: 15 15 15;
-    --card: 255 255 255;
-    --card-foreground: 15 15 15;
-    --popover: 255 255 255;
-    --popover-foreground: 15 15 15;
-    --primary: 118 185 0;
-    --primary-foreground: 255 255 255;
-    --secondary: 248 250 252;
-    --secondary-foreground: 15 15 15;
-    --muted: 248 250 252;
-    --muted-foreground: 100 116 139;
-    --accent: 248 250 252;
-    --accent-foreground: 15 15 15;
-    --destructive: 239 68 68;
+    /* Light theme colors - NVIDIA inspired */
+    --background: 245 245 245; /* #F5F5F5 - Soft neutral white */
+    --foreground: 26 26 26; /* #1A1A1A - Almost black, readable */
+    --card: 255 255 255; /* #FFFFFF - Clean white cards */
+    --card-foreground: 26 26 26; /* #1A1A1A - Almost black, readable */
+    --popover: 255 255 255; /* #FFFFFF - Clean white cards */
+    --popover-foreground: 26 26 26; /* #1A1A1A - Almost black, readable */
+    --primary: 118 185 0; /* #76B900 - NVIDIA Green */
+    --primary-foreground: 255 255 255; /* White text on green */
+    --secondary: 238 238 238; /* #EEEEEE - Light hover backgrounds */
+    --secondary-foreground: 26 26 26; /* #1A1A1A - Almost black, readable */
+    --muted: 238 238 238; /* #EEEEEE - Light hover backgrounds */
+    --muted-foreground: 85 85 85; /* #555555 - Gray for less important text */
+    --accent: 238 238 238; /* #EEEEEE - Light hover backgrounds */
+    --accent-foreground: 26 26 26; /* #1A1A1A - Almost black, readable */
+    --destructive: 239 68 68; /* Keep existing destructive color */
     --destructive-foreground: 255 255 255;
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 118 185 0;
+    --border: 221 221 221; /* #DDDDDD - Soft light gray lines */
+    --input: 221 221 221; /* #DDDDDD - Soft light gray lines */
+    --ring: 118 185 0; /* #76B900 - NVIDIA Green */
     --radius: 0.5rem;
-    --nvidia-green: 118 185 0;
-    --nvidia-dark: 15 15 15;
-    --nvidia-gray: 71 85 105;
+    --nvidia-green: 118 185 0; /* #76B900 */
+    --nvidia-dark: 26 26 26; /* #1A1A1A */
+    --nvidia-gray: 85 85 85; /* #555555 */
   }
 
   .dark {
-    /* Dark theme - Clean NVIDIA inspired */
-    --background: 15 15 15;
-    --foreground: 255 255 255;
-    --card: 24 24 27;
-    --card-foreground: 255 255 255;
-    --popover: 15 15 15;
-    --popover-foreground: 255 255 255;
-    --primary: 118 185 0;
-    --primary-foreground: 15 15 15;
-    --secondary: 39 39 42;
-    --secondary-foreground: 255 255 255;
-    --muted: 39 39 42;
-    --muted-foreground: 161 161 170;
-    --accent: 39 39 42;
-    --accent-foreground: 255 255 255;
-    --destructive: 239 68 68;
+    /* Dark theme colors - NVIDIA inspired */
+    --background: 18 18 18; /* #121212 - Deep black/gray base */
+    --foreground: 255 255 255; /* #FFFFFF - High contrast white */
+    --card: 30 30 30; /* #1E1E1E - Slightly lighter than background */
+    --card-foreground: 255 255 255; /* #FFFFFF - High contrast white */
+    --popover: 18 18 18; /* #121212 - Deep black/gray base */
+    --popover-foreground: 255 255 255; /* #FFFFFF - High contrast white */
+    --primary: 118 185 0; /* #76B900 - NVIDIA Green */
+    --primary-foreground: 18 18 18; /* Dark text on green */
+    --secondary: 46 46 46; /* #2E2E2E - Slightly brighter than card background */
+    --secondary-foreground: 255 255 255; /* #FFFFFF - High contrast white */
+    --muted: 46 46 46; /* #2E2E2E - Slightly brighter than card background */
+    --muted-foreground: 204 204 204; /* #CCCCCC - Muted white for secondary info */
+    --accent: 46 46 46; /* #2E2E2E - Slightly brighter than card background */
+    --accent-foreground: 255 255 255; /* #FFFFFF - High contrast white */
+    --destructive: 239 68 68; /* Keep existing destructive color */
     --destructive-foreground: 255 255 255;
-    --border: 39 39 42;
-    --input: 39 39 42;
-    --ring: 118 185 0;
-    --nvidia-green: 118 185 0;
-    --nvidia-dark: 15 15 15;
-    --nvidia-gray: 71 85 105;
+    --border: 42 42 42; /* #2A2A2A - Subtle lines for separation */
+    --input: 42 42 42; /* #2A2A2A - Subtle lines for separation */
+    --ring: 118 185 0; /* #76B900 - NVIDIA Green */
+    --nvidia-green: 118 185 0; /* #76B900 */
+    --nvidia-dark: 18 18 18; /* #121212 */
+    --nvidia-gray: 204 204 204; /* #CCCCCC */
   }
 }
 
