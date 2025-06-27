@@ -20,13 +20,13 @@ export const FormStepper: React.FC<FormStepperProps> = ({
   onSubmit
 }) => {
   return (
-    <div className="glass-card rounded-2xl p-4 mt-6 border-0">
+    <div className="minimal-card mt-6">
       <div className="flex justify-between items-center">
         {currentStep > 1 ? (
           <Button 
-            variant="secondary" 
+            variant="outline" 
             onClick={onPrev}
-            className="glass-button border-0 text-white hover:text-white"
+            className="btn-minimal"
           >
             <ChevronLeft className="w-4 h-4 mr-2" />
             Previous
@@ -35,17 +35,17 @@ export const FormStepper: React.FC<FormStepperProps> = ({
           <div></div>
         )}
 
-        <div className="flex items-center space-x-2 text-white">
+        <div className="flex items-center space-x-2">
           <div className="flex space-x-2">
             {[1, 2, 3].map((step) => (
               <div
                 key={step}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                className={`w-2 h-2 rounded-full transition-all duration-200 ${
                   step === currentStep
-                    ? 'bg-white scale-125'
+                    ? 'bg-nvidia-green'
                     : step < currentStep
-                    ? 'bg-green-400'
-                    : 'bg-white/30'
+                    ? 'bg-foreground'
+                    : 'bg-muted-foreground'
                 }`}
               />
             ))}
@@ -55,7 +55,7 @@ export const FormStepper: React.FC<FormStepperProps> = ({
         {currentStep < 3 ? (
           <Button 
             onClick={onNext}
-            className="glass-button border-0 text-white hover:text-white"
+            className="btn-nvidia"
           >
             Next
             <ChevronRight className="w-4 h-4 ml-2" />
@@ -64,7 +64,7 @@ export const FormStepper: React.FC<FormStepperProps> = ({
           <Button 
             onClick={onSubmit} 
             disabled={isAnalyzing}
-            className="glass-button border-0 text-white hover:text-white disabled:opacity-50"
+            className="btn-nvidia disabled:opacity-50"
           >
             {isAnalyzing ? (
               <>

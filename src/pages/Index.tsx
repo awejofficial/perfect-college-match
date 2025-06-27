@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GraduationCap } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { CollegeResultsTable } from "@/components/CollegeResultsTable";
+import { MinimalResultsTable } from "@/components/MinimalResultsTable";
 import { Footer } from "@/components/Footer";
 import { HeroSection } from "@/components/HeroSection";
 import { FeatureCards } from "@/components/FeatureCards";
@@ -12,7 +12,7 @@ import {
   AcademicDetailsStep,
   FormStepper
 } from "@/components/form-steps";
-import { EnhancedPreferencesStep } from "@/components/form-steps/EnhancedPreferencesStep";
+import { MinimalPreferencesStep } from "@/components/form-steps/MinimalPreferencesStep";
 import { 
   fetchCutoffData, 
   fetchAvailableCollegeTypes, 
@@ -352,18 +352,18 @@ const Index = () => {
 
   if (showResults) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-background">
         <div className="flex-1 p-4">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <div className="text-center mb-8">
-              <div className="glass-card rounded-2xl p-6 mb-6 border-0">
+              <div className="minimal-card mb-6">
                 <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
-                  <GraduationCap className="h-10 w-10 text-nvidia-green" />
+                  <GraduationCap className="h-8 w-8 text-nvidia-green" />
                   DSE College Finder 2024
                 </h1>
                 <div className="text-muted-foreground space-y-1">
                   <p>College Eligibility Results for <strong className="text-foreground">{formData.fullName}</strong></p>
-                  <div className="text-sm glass rounded-lg p-3 inline-block mt-2">
+                  <div className="text-sm bg-muted rounded p-3 inline-block mt-2">
                     <p><strong>Aggregate:</strong> {formData.aggregate}% | <strong>Category:</strong> {formData.category}</p>
                     <p><strong>Branches:</strong> {formData.preferredBranches.length} | <strong>Colleges:</strong> {formData.selectedColleges.length || 'All'}</p>
                   </div>
@@ -371,7 +371,7 @@ const Index = () => {
               </div>
             </div>
 
-            <CollegeResultsTable 
+            <MinimalResultsTable 
               results={results} 
               studentName={formData.fullName}
               onRefillForm={refillForm}
@@ -385,8 +385,8 @@ const Index = () => {
 
   if (isLoadingOptions) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center glass-card rounded-2xl p-8 border-0">
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center minimal-card">
           <LoadingSpinner />
           <p className="mt-4 text-foreground">Loading form options...</p>
         </div>
@@ -396,7 +396,7 @@ const Index = () => {
 
   if (!showForm) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-background">
         <div className="flex-1">
           <HeroSection onStartClick={handleStartJourney} />
           <FeatureCards />
@@ -407,16 +407,16 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <div className="flex-1 p-4">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
-            <div className="glass-card rounded-2xl p-6 border-0">
+            <div className="minimal-card">
               <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
-                <GraduationCap className="h-10 w-10 text-nvidia-green" />
+                <GraduationCap className="h-8 w-8 text-nvidia-green" />
                 DSE College Finder 2024
               </h1>
-              <p className="text-muted-foreground">Find eligible colleges in Maharashtra based on real cutoff data</p>
+              <p className="text-muted-foreground">Find eligible colleges based on real cutoff data</p>
             </div>
           </div>
 
@@ -447,7 +447,7 @@ const Index = () => {
               )}
 
               {currentStep === 3 && (
-                <EnhancedPreferencesStep
+                <MinimalPreferencesStep
                   preferredBranches={formData.preferredBranches}
                   collegeTypes={formData.collegeTypes}
                   selectedColleges={formData.selectedColleges}
