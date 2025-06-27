@@ -4,6 +4,8 @@ import { toast } from "@/hooks/use-toast";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { CollegeResultsTable } from "@/components/CollegeResultsTable";
 import { Footer } from "@/components/Footer";
+import { HeroSection } from "@/components/HeroSection";
+import { FeatureCards } from "@/components/FeatureCards";
 import { 
   WelcomeStep,
   PersonalInfoStep,
@@ -64,6 +66,7 @@ const Index = () => {
     selectedColleges: [] as string[],
     collegeSelections: [] as CollegeSelection[]
   });
+  const [showForm, setShowForm] = useState(false);
 
   const collegeTypeOptions: CollegeType[] = [
     { value: 'Government', label: 'Government' },
@@ -343,6 +346,10 @@ const Index = () => {
     }
   };
 
+  const handleStartJourney = () => {
+    setShowForm(true);
+  };
+
   if (showResults) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -350,12 +357,12 @@ const Index = () => {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-8">
               <div className="glass-card rounded-2xl p-6 mb-6 border-0">
-                <h1 className="text-4xl font-bold text-white mb-2 flex items-center justify-center gap-2">
-                  <GraduationCap className="h-10 w-10 text-blue-300" />
+                <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
+                  <GraduationCap className="h-10 w-10 text-nvidia-green" />
                   DSE College Finder 2024
                 </h1>
-                <div className="text-gray-200 space-y-1">
-                  <p>College Eligibility Results for <strong className="text-white">{formData.fullName}</strong></p>
+                <div className="text-muted-foreground space-y-1">
+                  <p>College Eligibility Results for <strong className="text-foreground">{formData.fullName}</strong></p>
                   <div className="text-sm glass rounded-lg p-3 inline-block mt-2">
                     <p><strong>Aggregate:</strong> {formData.aggregate}% | <strong>Category:</strong> {formData.category}</p>
                     <p><strong>Branches:</strong> {formData.preferredBranches.length} | <strong>Colleges:</strong> {formData.selectedColleges.length || 'All'}</p>
@@ -381,8 +388,20 @@ const Index = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center glass-card rounded-2xl p-8 border-0">
           <LoadingSpinner />
-          <p className="mt-4 text-white">Loading form options...</p>
+          <p className="mt-4 text-foreground">Loading form options...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (!showForm) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <div className="flex-1">
+          <HeroSection onStartClick={handleStartJourney} />
+          <FeatureCards />
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -393,11 +412,11 @@ const Index = () => {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
             <div className="glass-card rounded-2xl p-6 border-0">
-              <h1 className="text-4xl font-bold text-white mb-2 flex items-center justify-center gap-2">
-                <GraduationCap className="h-10 w-10 text-blue-300" />
+              <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center justify-center gap-2">
+                <GraduationCap className="h-10 w-10 text-nvidia-green" />
                 DSE College Finder 2024
               </h1>
-              <p className="text-gray-200">Find eligible colleges in Maharashtra based on real cutoff data</p>
+              <p className="text-muted-foreground">Find eligible colleges in Maharashtra based on real cutoff data</p>
             </div>
           </div>
 
