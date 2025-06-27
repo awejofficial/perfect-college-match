@@ -183,7 +183,8 @@
 
   /* Focus styles */
   .focus-nvidia {
-    @apply focus:outline-none focus:ring-2 focus:ring-nvidia-green focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    --tw-ring-color: rgb(var(--nvidia-green));
   }
 
   /* Clean input styles */
@@ -193,7 +194,9 @@
   }
 
   .input-nvidia:focus {
-    @apply outline-none ring-2 ring-nvidia-green/20 border-nvidia-green;
+    @apply outline-none ring-2 ring-offset-2;
+    --tw-ring-color: rgb(var(--nvidia-green));
+    border-color: rgb(var(--nvidia-green));
   }
 
   /* Animation utilities */
