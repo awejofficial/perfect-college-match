@@ -14,7 +14,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartClick }) => {
         <div className="max-w-4xl mx-auto text-center animate-fade-in">
           {/* Main Hero Content */}
           <div className="mb-16">
-            <div className="inline-flex items-center gap-2 bg-gray-100 text-black px-4 py-2 rounded-full text-sm font-medium mb-8">
+            <div className="inline-flex items-center gap-2 bg-white border border-gray-200 text-black px-4 py-2 rounded-full text-sm font-medium mb-8">
               <Target className="h-4 w-4" />
               <span>Precision Engineering Guidance</span>
             </div>
@@ -72,7 +72,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onStartClick }) => {
               const Icon = stat.icon;
               return (
                 <div key={stat.label} className="card-professional text-center group">
-                  <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-lg mx-auto mb-4 group-hover:bg-gray-200 transition-all duration-200">
+                  <div className="flex items-center justify-center w-12 h-12 bg-white border border-gray-200 rounded-lg mx-auto mb-4 group-hover:border-black transition-all duration-200">
                     <Icon className="h-6 w-6 text-black" />
                   </div>
                   <div className="text-3xl font-bold text-black mb-2">{stat.number}</div>

@@ -37,7 +37,7 @@ const features = [
 
 export const FeatureCards: React.FC = () => {
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-white">
       <div className="container-nvidia">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl font-bold text-black mb-4">
@@ -57,7 +57,7 @@ export const FeatureCards: React.FC = () => {
                 className="card-professional group animate-scale-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="flex items-center justify-center w-14 h-14 bg-gray-100 rounded-xl mb-6 group-hover:bg-gray-200 transition-all duration-200">
+                <div className="flex items-center justify-center w-14 h-14 bg-white border border-gray-200 rounded-xl mb-6 group-hover:border-black transition-all duration-200">
                   <Icon className="h-7 w-7 text-black" />
                 </div>
                 

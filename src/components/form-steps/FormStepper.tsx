@@ -44,8 +44,8 @@ export const FormStepper: React.FC<FormStepperProps> = ({
                   step === currentStep
                     ? 'bg-black'
                     : step < currentStep
-                    ? 'bg-foreground'
-                    : 'bg-muted-foreground'
+                    ? 'bg-black'
+                    : 'bg-gray-300'
                 }`}
               />
             ))}
