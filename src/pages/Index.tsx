@@ -105,7 +105,6 @@ const Index = () => {
   };
 
   const processCollegeMatches = (cutoffData: CutoffRecord[], studentAggregate: number): CollegeMatch[] => {
-    // Group by unique combination of college_name, branch_name, category
     const uniqueCombinations = new Map<string, CutoffRecord>();
     
     cutoffData.forEach(record => {
@@ -116,7 +115,6 @@ const Index = () => {
     });
 
     const matches: CollegeMatch[] = Array.from(uniqueCombinations.values()).map(record => {
-      // Check eligibility against any available cutoff
       const eligibleForCap1 = record.cap1_cutoff ? studentAggregate >= record.cap1_cutoff : false;
       const eligibleForCap2 = record.cap2_cutoff ? studentAggregate >= record.cap2_cutoff : false;
       const eligibleForCap3 = record.cap3_cutoff ? studentAggregate >= record.cap3_cutoff : false;
@@ -136,12 +134,10 @@ const Index = () => {
       };
     });
 
-    // Sort by eligible first, then by lowest cutoff available
     return matches.sort((a, b) => {
       if (a.eligible && !b.eligible) return -1;
       if (!a.eligible && b.eligible) return 1;
       
-      // Get lowest cutoff for sorting
       const getLowestCutoff = (college: CollegeMatch) => {
         const cutoffs = [college.cap1Cutoff, college.cap2Cutoff, college.cap3Cutoff]
           .filter(c => c !== null) as number[];
@@ -195,10 +191,8 @@ const Index = () => {
     setIsAnalyzing(true);
     
     try {
-      // Use all colleges if none selected specifically
       let collegesToSearch = formData.selectedColleges;
       if (collegesToSearch.length === 0) {
-        // Auto-select all available colleges
         const allColleges = await fetchAllCollegeNames();
         collegesToSearch = allColleges;
       }
@@ -208,7 +202,6 @@ const Index = () => {
       console.log('College types filter:', formData.collegeTypes);
       console.log('Colleges to search:', collegesToSearch.length);
       
-      // Fetch data for all selected branches
       const allCutoffData: CutoffRecord[] = [];
       
       for (const branch of formData.preferredBranches) {
@@ -258,7 +251,6 @@ const Index = () => {
   };
 
   const handleNext = () => {
-    // Validate current step before proceeding
     if (currentStep === 1 && isGuest && !formData.fullName.trim()) {
       toast({
         title: "Name Required",
