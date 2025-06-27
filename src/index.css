@@ -17,16 +17,16 @@
     --popover-foreground: 0 0 0; /* Pure black */
     --primary: 0 0 0; /* Pure black instead of green */
     --primary-foreground: 255 255 255; /* White text on black */
-    --secondary: 250 250 250; /* Very light gray for subtle backgrounds */
+    --secondary: 248 248 248; /* Very light gray for subtle backgrounds */
     --secondary-foreground: 0 0 0; /* Pure black */
-    --muted: 245 245 245; /* Minimal gray for disabled states */
+    --muted: 250 250 250; /* Minimal gray for disabled states */
     --muted-foreground: 64 64 64; /* Dark gray for secondary text */
-    --accent: 250 250 250; /* Very light gray */
+    --accent: 248 248 248; /* Very light gray */
     --accent-foreground: 0 0 0; /* Pure black */
     --destructive: 220 38 38; /* Red for errors */
     --destructive-foreground: 255 255 255;
     --border: 229 229 229; /* Light gray borders */
-    --input: 245 245 245; /* Minimal input backgrounds */
+    --input: 248 248 248; /* Minimal input backgrounds */
     --ring: 0 0 0; /* Pure black for focus */
     --radius: 0.375rem; /* Sharp corners */
   }
@@ -42,13 +42,13 @@
   }
 
   body {
-    @apply bg-background text-foreground font-[Inter] antialiased;
+    @apply bg-white text-black font-[Inter] antialiased;
     min-height: 100vh;
     line-height: 1.5;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold leading-tight;
+    @apply font-semibold leading-tight text-black;
   }
 
   h1 {
@@ -68,7 +68,7 @@
 @layer utilities {
   /* Clean card styles */
   .minimal-card {
-    @apply bg-card border border-border rounded-md p-6;
+    @apply bg-white border border-gray-200 rounded-lg p-6;
     transition: border-color 0.2s ease;
   }
 
@@ -78,27 +78,19 @@
 
   /* Black button */
   .btn-nvidia {
-    @apply bg-black text-white px-6 py-3 rounded-md font-medium;
+    @apply bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800;
     transition: all 0.2s ease;
-  }
-
-  .btn-nvidia:hover {
-    @apply bg-gray-800;
   }
 
   /* Minimal secondary button */
   .btn-minimal {
-    @apply bg-transparent border border-border text-foreground px-6 py-3 rounded-md font-medium;
+    @apply bg-white border border-gray-200 text-black px-6 py-3 rounded-lg font-medium hover:bg-gray-50;
     transition: all 0.2s ease;
-  }
-
-  .btn-minimal:hover {
-    @apply bg-muted;
   }
 
   /* Clean input styles */
   .input-minimal {
-    @apply bg-input border border-border rounded-md px-4 py-3 text-foreground placeholder:text-muted-foreground;
+    @apply bg-white border border-gray-200 rounded-lg px-4 py-3 text-black placeholder:text-gray-500;
     transition: all 0.2s ease;
   }
 
@@ -124,6 +116,11 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
+  /* Grid layouts */
+  .grid-nvidia-4 {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8;
+  }
+
   /* Clean transitions */
   .transition-minimal {
     transition: all 0.2s ease;
@@ -144,12 +141,26 @@
 
   /* Card professional styles */
   .card-professional {
-    @apply bg-card text-card-foreground rounded-lg border shadow-sm;
+    @apply bg-white text-black rounded-lg border border-gray-200 p-6 hover:border-gray-300;
+    transition: all 0.2s ease;
+  }
+
+  /* Hero section */
+  .hero-section {
+    @apply bg-white;
   }
 
   /* Animation utilities - minimal */
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
   }
 
   @keyframes fadeIn {
@@ -160,6 +171,28 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
     }
   }
 }

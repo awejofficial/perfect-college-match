@@ -37,13 +37,13 @@ const features = [
 
 export const FeatureCards: React.FC = () => {
   return (
-    <section className="py-20 bg-muted/30">
+    <section className="py-20 bg-gray-50">
       <div className="container-nvidia">
         <div className="text-center mb-16 animate-fade-in">
-          <h2 className="text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-4xl font-bold text-black mb-4">
             Why Choose Our Platform
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Comprehensive tools and insights to make informed decisions about your engineering career
           </p>
         </div>
@@ -57,15 +57,15 @@ export const FeatureCards: React.FC = () => {
                 className="card-professional group animate-scale-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="flex items-center justify-center w-14 h-14 bg-nvidia-green/10 rounded-xl mb-6 group-hover:bg-nvidia-green/20 transition-nvidia">
-                  <Icon className="h-7 w-7 text-nvidia-green" />
+                <div className="flex items-center justify-center w-14 h-14 bg-gray-100 rounded-xl mb-6 group-hover:bg-gray-200 transition-all duration-200">
+                  <Icon className="h-7 w-7 text-black" />
                 </div>
                 
-                <h3 className="text-xl font-semibold text-foreground mb-3">
+                <h3 className="text-xl font-semibold text-black mb-3">
                   {feature.title}
                 </h3>
                 
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-gray-600 leading-relaxed">
                   {feature.description}
                 </p>
               </div>
